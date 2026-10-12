@@ -243,10 +243,11 @@
     <script>
         // Supabase Setup
         const SUPABASE_URL = 'https://pjujibzoscawmstarerz.supabase.co';
+        // הדבק כאן את מפתח ה-anon המתחיל ב-eyJ...
         const SUPABASE_KEY = 'sb_publishable_5mK3Md5VCpXjHTSgVv68GQ_8kmPbg83';
         
         let supabase = null;
-        if (window.supabase) {
+        if (window.supabase && SUPABASE_KEY !== 'YOUR_ANON_KEY_HERE' && SUPABASE_KEY.startsWith('eyJ')) {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
 
@@ -261,7 +262,7 @@
             fetchTaskItems();
         });
 
-        // Tab Switch (עובד תמיד ללא תלות בחיבור לרשת)
+        // Tab Switch
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             const activeContent = document.getElementById(`content-${tabName}`);
@@ -289,16 +290,21 @@
         async function fetchShoppingItems() {
             if (supabase) {
                 try {
-                    const { data, error } = await supabase
-                        .from('shopping')
-                        .select('*')
-                        .order('created_at', { ascending: false });
-
-                    if (!error && data) {
-                        shoppingItems = data;
+                    // הגדרת timeout כדי שלא ייתקע
+                    const fetchPromise = supabase.from('shopping').select('*').order('created_at', { ascending: false });
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('timeout'), 2500));
+                    
+                    const res = await Promise.race([fetchPromise, timeoutPromise]);
+                    if (res && !res.error && res.data) {
+                        shoppingItems = res.data;
                     }
                 } catch (e) {
-                    console.error('Supabase fetch error:', e);
+                    console.warn('Supabase not connected, running offline fallback');
+                    document.getElementById('db-status').innerHTML = `
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 ml-1.5"></span>
+                        מצב מקומי
+                    `;
+                    document.getElementById('db-status').className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200";
                 }
             }
             renderShoppingList();
@@ -345,14 +351,18 @@
             if (!value) return;
 
             if (supabase) {
-                const { data, error } = await supabase
-                    .from('shopping')
-                    .insert([{ title: value }])
-                    .select();
+                try {
+                    const { data, error } = await supabase
+                        .from('shopping')
+                        .insert([{ title: value }])
+                        .select();
 
-                if (!error && data) {
-                    shoppingItems.unshift(data[0]);
-                } else {
+                    if (!error && data) {
+                        shoppingItems.unshift(data[0]);
+                    } else {
+                        shoppingItems.unshift({ id: Date.now(), title: value });
+                    }
+                } catch(err) {
                     shoppingItems.unshift({ id: Date.now(), title: value });
                 }
             } else {
@@ -364,7 +374,9 @@
 
         async function removeShoppingItem(id) {
             if (supabase) {
-                await supabase.from('shopping').delete().eq('id', id);
+                try {
+                    await supabase.from('shopping').delete().eq('id', id);
+                } catch(e) {}
             }
             shoppingItems = shoppingItems.filter(item => item.id !== id);
             renderShoppingList();
@@ -374,16 +386,15 @@
         async function fetchTaskItems() {
             if (supabase) {
                 try {
-                    const { data, error } = await supabase
-                        .from('tasks')
-                        .select('*')
-                        .order('created_at', { ascending: false });
+                    const fetchPromise = supabase.from('tasks').select('*').order('created_at', { ascending: false });
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('timeout'), 2500));
 
-                    if (!error && data) {
-                        taskItems = data;
+                    const res = await Promise.race([fetchPromise, timeoutPromise]);
+                    if (res && !res.error && res.data) {
+                        taskItems = res.data;
                     }
                 } catch (e) {
-                    console.error('Supabase fetch error:', e);
+                    console.warn('Tasks offline mode');
                 }
             }
             renderTasksList();
@@ -430,14 +441,18 @@
             if (!value) return;
 
             if (supabase) {
-                const { data, error } = await supabase
-                    .from('tasks')
-                    .insert([{ title: value }])
-                    .select();
+                try {
+                    const { data, error } = await supabase
+                        .from('tasks')
+                        .insert([{ title: value }])
+                        .select();
 
-                if (!error && data) {
-                    taskItems.unshift(data[0]);
-                } else {
+                    if (!error && data) {
+                        taskItems.unshift(data[0]);
+                    } else {
+                        taskItems.unshift({ id: Date.now(), title: value });
+                    }
+                } catch(e) {
                     taskItems.unshift({ id: Date.now(), title: value });
                 }
             } else {
@@ -449,7 +464,9 @@
 
         async function removeTaskItem(id) {
             if (supabase) {
-                await supabase.from('tasks').delete().eq('id', id);
+                try {
+                    await supabase.from('tasks').delete().eq('id', id);
+                } catch(e) {}
             }
             taskItems = taskItems.filter(item => item.id !== id);
             renderTasksList();
