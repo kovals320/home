@@ -361,21 +361,71 @@
         </section>
 
         <!-- Tab 5: גינה -->
-        <section id="content-garden" class="tab-content hidden space-y-6">
+        <section id="content-garden" class="tab-content hidden space-y-5">
+            
+            <!-- קווי השקיה - כרטיסי הגדרה -->
             <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-2 bg-green-100 text-green-600 rounded-xl">
-                        <i data-lucide="sprout" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800">מעקב גינה והשקיה</h2>
-                        <p class="text-xs text-slate-500">תכנון השקיה, דישון ותחזוקת הצמחים והדשא</p>
-                    </div>
+                <div class="flex items-center gap-2 mb-4">
+                    <i data-lucide="sprout" class="w-5 h-5 text-emerald-600"></i>
+                    <h2 class="text-base font-bold text-slate-800">קווי השקיה</h2>
                 </div>
-                <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-                    <p class="text-slate-500 text-sm">התוכן של מעקב השקיית הגינה יתווסף בשלב הבא...</p>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- קו 1 -->
+                    <div class="p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/50 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-sm text-emerald-900 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                דשא
+                            </span>
+                            <span class="text-[10px] font-semibold text-emerald-600/80 bg-emerald-100/80 px-2 py-0.5 rounded-md">קו 1</span>
+                        </div>
+                        <div class="text-xs text-emerald-700 font-medium">כל שבת · 05:30 · 90 דק'</div>
+                    </div>
+
+                    <!-- קו 2 -->
+                    <div class="p-3.5 rounded-2xl border border-teal-200 bg-teal-50/50 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-sm text-teal-900 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                                שיחים
+                            </span>
+                            <span class="text-[10px] font-semibold text-teal-600/80 bg-teal-100/80 px-2 py-0.5 rounded-md">קו 2</span>
+                        </div>
+                        <div class="text-xs text-teal-700 font-medium">כל חמישי · 06:30 · 30 דק'</div>
+                    </div>
+
+                    <!-- קו 3 -->
+                    <div class="p-3.5 rounded-2xl border border-amber-200 bg-amber-50/50 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-sm text-amber-900 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                עצים
+                            </span>
+                            <span class="text-[10px] font-semibold text-amber-600/80 bg-amber-100/80 px-2 py-0.5 rounded-md">קו 3</span>
+                        </div>
+                        <div class="text-xs text-amber-700 font-medium">כל 3 ימים · 07:30 · 20 דק'</div>
+                    </div>
+
+                    <!-- קו 4 -->
+                    <div class="p-3.5 rounded-2xl border border-rose-200 bg-rose-50/50 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-sm text-rose-900 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                פרחים
+                            </span>
+                            <span class="text-[10px] font-semibold text-rose-600/80 bg-rose-100/80 px-2 py-0.5 rounded-md">קו 4</span>
+                        </div>
+                        <div class="text-xs text-rose-700 font-medium">כל חמישי · 08:00 · 10 דק'</div>
+                    </div>
                 </div>
             </div>
+
+            <!-- לוח זמנים הקרוב -->
+            <div id="garden-schedule-container" class="space-y-4">
+                <!-- יתמלא דינמית על ידי Javascript -->
+            </div>
+
         </section>
 
     </main>
@@ -420,6 +470,7 @@
         };
 
         const monthNames = ["", "ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+        const dayNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
 
         // State Variables
         let shoppingItems = [];
@@ -439,6 +490,7 @@
             fetchTaskItems();
             fetchFuelItems();
             fetchBudgetItems();
+            renderGardenSchedule();
         });
 
         // Tab Switch
@@ -721,7 +773,6 @@
                 if (!monthsMap[key]) monthsMap[key] = { year: item.year, month: item.month, items: [] };
                 monthsMap[key].items.push(item);
 
-                // חישוב ממוצעים לשנת 2026 בלבד
                 if (Number(item.year) === 2026 && categorySums2026[item.category] !== undefined) {
                     categorySums2026[item.category] += Number(item.amount);
                     categoryCounts2026[item.category] += 1;
@@ -839,6 +890,104 @@
             try {
                 await fetch(`${SUPABASE_BASE_URL}/budget?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
             } catch (e) {}
+        }
+
+        // --- Garden Schedule Logic ---
+        function renderGardenSchedule() {
+            const container = document.getElementById('garden-schedule-container');
+            const today = new Date();
+            
+            // הגדרת 4 קווי ההשקיה
+            const lines = [
+                {
+                    name: 'דשא',
+                    lineNum: 1,
+                    time: '05:30',
+                    duration: '90 דק\'',
+                    color: 'emerald',
+                    dotBg: 'bg-emerald-500',
+                    isDue: (date) => date.getDay() === 6 // כל שבת (Saturday = 6)
+                },
+                {
+                    name: 'שיחים',
+                    lineNum: 2,
+                    time: '06:30',
+                    duration: '30 דק\'',
+                    color: 'teal',
+                    dotBg: 'bg-teal-500',
+                    isDue: (date) => date.getDay() === 4 // כל חמישי (Thursday = 4)
+                },
+                {
+                    name: 'עצים',
+                    lineNum: 3,
+                    time: '07:30',
+                    duration: '20 דק\'',
+                    color: 'amber',
+                    dotBg: 'bg-amber-500',
+                    // כל 3 ימים (מחושב יחסית לנקודת ייחוס של יום שבת 11/10/2026)
+                    isDue: (date) => {
+                        const refDate = new Date(2026, 9, 11); // Oct 11, 2026
+                        const diffTime = Math.floor((date.setHours(0,0,0,0) - refDate.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+                        return diffTime % 3 === 0;
+                    }
+                },
+                {
+                    name: 'פרחים',
+                    lineNum: 4,
+                    time: '08:00',
+                    duration: '10 דק\'',
+                    color: 'rose',
+                    dotBg: 'bg-rose-500',
+                    isDue: (date) => date.getDay() === 4 // כל חמישי (Thursday = 4)
+                }
+            ];
+
+            // חישוב לוח הזמנים ל-7 הימים הקרובים
+            let scheduleHtml = '';
+
+            for (let i = 0; i < 7; i++) {
+                const targetDate = new Date();
+                targetDate.setDate(today.getDate() + i);
+                
+                // בדיקה אילו קווים פועלים ביום זה
+                const activeLines = lines.filter(line => line.isDue(new Date(targetDate)));
+
+                if (activeLines.length > 0) {
+                    let dayLabel = '';
+                    if (i === 0) dayLabel = 'היום';
+                    else if (i === 1) dayLabel = 'מחר';
+                    else dayLabel = `בעוד ${i} ימים`;
+
+                    const dateHeader = `יום ${dayNames[targetDate.getDay()]}, ${targetDate.getDate()} ב${monthNames[targetDate.getMonth() + 1]}`;
+
+                    scheduleHtml += `
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-700 px-1 pt-1">
+                                <span>${dateHeader}</span>
+                                <span class="text-slate-400 font-medium">${dayLabel}</span>
+                            </div>
+                            <div class="space-y-2">
+                                ${activeLines.map(line => `
+                                    <div class="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
+                                            <span class="text-sm font-bold text-slate-800">${line.time}</span>
+                                            <span class="text-xs text-slate-400 font-normal mr-1">${line.duration}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-bold text-slate-800">${line.name}</span>
+                                            <span class="w-2.5 h-2.5 rounded-full ${line.dotBg}"></span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            container.innerHTML = scheduleHtml || `<div class="text-center py-8 text-slate-400">אין השקיות מתוכננות לימים הקרובים</div>`;
+            lucide.createIcons();
         }
     </script>
 </body>
