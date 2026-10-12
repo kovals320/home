@@ -247,21 +247,112 @@
         </section>
 
         <!-- Tab 4: תקציב -->
-        <section id="content-budget" class="tab-content hidden space-y-6">
-            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
-                        <i data-lucide="wallet" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800">מעקב תקציב והוצאות</h2>
-                        <p class="text-xs text-slate-500">ניהול הוצאות חודשיות וקטגוריות</p>
-                    </div>
+        <section id="content-budget" class="tab-content hidden space-y-5">
+            
+            <!-- סיכום חודשי ממוצע -->
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60 text-center">
+                <div class="text-xs font-medium text-slate-500 mb-1">סיכום חודשי ממוצע</div>
+                <div id="budget-total-avg" class="text-3xl font-extrabold text-slate-900 tracking-tight">₪0</div>
+                <div class="text-[11px] text-slate-400 mt-1">ממוצע כל הקטגוריות</div>
+            </div>
+
+            <!-- 5 כרטיסי ממוצע קטגוריאליים -->
+            <div class="grid grid-cols-3 gap-2.5">
+                <div class="glass-card p-3 rounded-2xl text-center border border-indigo-100 bg-indigo-50/30">
+                    <div class="text-[11px] font-medium text-indigo-600 mb-1">אשראי חודשי</div>
+                    <div id="cat-avg-credit" class="text-sm font-bold text-indigo-950">₪0</div>
+                    <div class="text-[9px] text-slate-400">ממוצע</div>
                 </div>
-                <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-                    <p class="text-slate-500 text-sm">התוכן של מעקב ההוצאות יתווסף בשלב הבא...</p>
+                <div class="glass-card p-3 rounded-2xl text-center border border-purple-100 bg-purple-50/30">
+                    <div class="text-[11px] font-medium text-purple-600 mb-1">אשראי תשלומים</div>
+                    <div id="cat-avg-installments" class="text-sm font-bold text-purple-950">₪0</div>
+                    <div class="text-[9px] text-slate-400">ממוצע</div>
+                </div>
+                <div class="glass-card p-3 rounded-2xl text-center border border-emerald-100 bg-emerald-50/30">
+                    <div class="text-[11px] font-medium text-emerald-600 mb-1">קיבוץ</div>
+                    <div id="cat-avg-kibbutz" class="text-sm font-bold text-emerald-950">₪0</div>
+                    <div class="text-[9px] text-slate-400">ממוצע</div>
+                </div>
+                <div class="glass-card p-3 rounded-2xl text-center border border-amber-100 bg-amber-50/30">
+                    <div class="text-[11px] font-medium text-amber-600 mb-1">משכנתא</div>
+                    <div id="cat-avg-mortgage" class="text-sm font-bold text-amber-950">₪0</div>
+                    <div class="text-[9px] text-slate-400">ממוצע</div>
+                </div>
+                <div class="glass-card p-3 rounded-2xl text-center border border-blue-100 bg-blue-50/30 col-span-2">
+                    <div class="text-[11px] font-medium text-blue-600 mb-1">דלק</div>
+                    <div id="cat-avg-fuel" class="text-sm font-bold text-blue-950">₪0</div>
+                    <div class="text-[9px] text-slate-400">ממוצע</div>
                 </div>
             </div>
+
+            <!-- טופס דיווח הוצאות חודשי -->
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-emerald-600"></i>
+                    דיווח / עדכון הוצאה חודשית
+                </h3>
+                <form onsubmit="addBudgetItem(event)" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">חודש</label>
+                            <select id="budget-month" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                                <option value="1">ינואר</option>
+                                <option value="2">פברואר</option>
+                                <option value="3">מרץ</option>
+                                <option value="4">אפריל</option>
+                                <option value="5">מאי</option>
+                                <option value="6">יוני</option>
+                                <option value="7">יולי</option>
+                                <option value="8">אוגוסט</option>
+                                <option value="9">ספטמבר</option>
+                                <option value="10">אוקטובר</option>
+                                <option value="11">נובמבר</option>
+                                <option value="12">דצמבר</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">שנה</label>
+                            <input type="number" id="budget-year" value="2026" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">קטגוריה</label>
+                            <select id="budget-category" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                                <option value="אשראי חודשי">אשראי חודשי</option>
+                                <option value="אשראי תשלומים">אשראי תשלומים</option>
+                                <option value="קיבוץ">קיבוץ</option>
+                                <option value="משכנתא">משכנתא</option>
+                                <option value="דלק">דלק</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">סכום (₪)</label>
+                            <input type="number" step="0.01" id="budget-amount" placeholder="5000" required class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white py-3 rounded-2xl font-medium text-sm shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all mt-2">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        שמור הוצאה
+                    </button>
+                </form>
+            </div>
+
+            <!-- היסטוריית תקציב לפי חודשים -->
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center justify-between">
+                    <span>היסטוריית דיווחים חודשיים</span>
+                    <span id="budget-count" class="text-xs font-semibold bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200">
+                        0 חודשים
+                    </span>
+                </h3>
+                <div id="budget-list" class="space-y-4">
+                    <div class="text-center py-8 text-slate-400">טוען נתוני תקציב...</div>
+                </div>
+            </div>
+
         </section>
 
         <!-- Tab 5: גינה -->
@@ -323,18 +414,27 @@
             'Prefer': 'return=representation'
         };
 
+        // Month Names Map
+        const monthNames = ["", "ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+
         // State Variables
         let shoppingItems = [];
         let taskItems = [];
         let fuelItems = [];
+        let budgetItems = [];
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             document.getElementById('fuel-date').valueAsDate = new Date();
+            const now = new Date();
+            document.getElementById('budget-month').value = now.getMonth() + 1;
+            document.getElementById('budget-year').value = now.getFullYear();
+
             fetchShoppingItems();
             fetchTaskItems();
             fetchFuelItems();
+            fetchBudgetItems();
         });
 
         // Tab Switch
@@ -510,26 +610,22 @@
                 return;
             }
 
-            // תדלוק אחרון (הראשון ברשימה הממוינת בסדר יורד)
             const last = fuelItems[0];
             document.getElementById('last-fuel-date').textContent = `— ${formatDate(last.date)}`;
             document.getElementById('last-fuel-liters').textContent = last.liters;
             document.getElementById('last-fuel-mileage').textContent = Number(last.mileage).toLocaleString();
             document.getElementById('last-fuel-price').textContent = `₪${Number(last.price).toFixed(2)}`;
 
-            // חישוב ממוצעים
             const totalPrice = fuelItems.reduce((acc, curr) => acc + Number(curr.price), 0);
             const avgPrice = (totalPrice / fuelItems.length).toFixed(2);
             document.getElementById('stat-avg-price').textContent = `₪${avgPrice}`;
 
             if (fuelItems.length > 1) {
-                // המרחק הכולל בין התדלוק הראשון לאחרון
                 const sortedByDate = [...fuelItems].sort((a, b) => new Date(a.date) - new Date(b.date));
                 const totalDist = sortedByDate[sortedByDate.length - 1].mileage - sortedByDate[0].mileage;
                 const avgDist = Math.round(totalDist / (fuelItems.length - 1));
                 document.getElementById('stat-avg-distance').textContent = `${avgDist.toLocaleString()} ק"מ`;
 
-                // הזמן הכולל בימים
                 const firstDate = new Date(sortedByDate[0].date);
                 const lastDate = new Date(sortedByDate[sortedByDate.length - 1].date);
                 const totalDays = Math.max(1, Math.round((lastDate - firstDate) / (1000 * 60 * 60 * 24)));
@@ -540,7 +636,6 @@
                 document.getElementById('stat-avg-days').textContent = '--';
             }
 
-            // היסטוריית תדלוקים
             listEl.innerHTML = fuelItems.map((item) => `
                 <div class="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between">
                     <div>
@@ -575,7 +670,6 @@
             fuelItems.sort((a, b) => new Date(b.date) - new Date(a.date));
             renderFuelUI();
 
-            // איפוס שדות הטופס
             document.getElementById('fuel-liters').value = '';
             document.getElementById('fuel-price').value = '';
             document.getElementById('fuel-mileage').value = '';
@@ -598,6 +692,148 @@
             renderFuelUI();
             try {
                 await fetch(`${SUPABASE_BASE_URL}/fuel?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
+            } catch (e) {}
+        }
+
+        // --- Budget Logic ---
+        async function fetchBudgetItems() {
+            try {
+                const res = await fetch(`${SUPABASE_BASE_URL}/budget?select=*&order=year.desc,month.desc`, { headers: apiHeaders });
+                if (res.ok) budgetItems = await res.json();
+            } catch (e) {}
+            renderBudgetUI();
+        }
+
+        function renderBudgetUI() {
+            const listEl = document.getElementById('budget-list');
+
+            // קטגוריות מוגדרות
+            const categories = ["אשראי חודשי", "אשראי תשלומים", "קיבוץ", "משכנתא", "דלק"];
+            const categorySums = { "אשראי חודשי": 0, "אשראי תשלומים": 0, "קיבוץ": 0, "משכנתא": 0, "דלק": 0 };
+            const categoryCounts = { "אשראי חודשי": 0, "אשראי תשלומים": 0, "קיבוץ": 0, "משכנתא": 0, "דלק": 0 };
+
+            // הקבצה לפי חודשים
+            const monthsMap = {};
+            budgetItems.forEach(item => {
+                const key = `${item.year}-${item.month}`;
+                if (!monthsMap[key]) monthsMap[key] = { year: item.year, month: item.month, items: [] };
+                monthsMap[key].items.push(item);
+
+                if (categorySums[item.category] !== undefined) {
+                    categorySums[item.category] += Number(item.amount);
+                    categoryCounts[item.category] += 1;
+                }
+            });
+
+            // חישוב ממוצעים לקטגוריות
+            let totalAvgSum = 0;
+            const categoryAvgIds = {
+                "אשראי חודשי": "cat-avg-credit",
+                "אשראי תשלומים": "cat-avg-installments",
+                "קיבוץ": "cat-avg-kibbutz",
+                "משכנתא": "cat-avg-mortgage",
+                "דלק": "cat-avg-fuel"
+            };
+
+            categories.forEach(cat => {
+                const count = categoryCounts[cat] || 1;
+                const avg = categorySums[cat] ? categorySums[cat] / count : 0;
+                totalAvgSum += avg;
+                const el = document.getElementById(categoryAvgIds[cat]);
+                if (el) el.textContent = `₪${Math.round(avg).toLocaleString()}`;
+            });
+
+            document.getElementById('budget-total-avg').textContent = `₪${Math.round(totalAvgSum).toLocaleString()}`;
+
+            const monthKeys = Object.keys(monthsMap).sort((a, b) => {
+                const [yA, mA] = a.split('-').map(Number);
+                const [yB, mB] = b.split('-').map(Number);
+                return yB !== yA ? yB - yA : mB - mA;
+            });
+
+            document.getElementById('budget-count').textContent = `${monthKeys.length} חודשים`;
+
+            if (monthKeys.length === 0) {
+                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><i data-lucide="wallet" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i><p class="text-sm">אין דיווחי תקציב עדיין</p></div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            listEl.innerHTML = monthKeys.map(key => {
+                const monthData = monthsMap[key];
+                const monthTotal = monthData.items.reduce((acc, curr) => acc + Number(curr.amount), 0);
+                
+                return `
+                    <div class="bg-white border border-slate-200/80 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <div class="font-bold text-slate-800 text-sm">
+                                ${monthNames[monthData.month]} ${monthData.year}
+                            </div>
+                            <div class="font-bold text-slate-900 text-sm">
+                                ₪${monthTotal.toLocaleString('he-IL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            ${monthData.items.map(item => `
+                                <div class="flex items-center justify-between text-xs py-1">
+                                    <span class="font-medium text-slate-700">${item.category}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-slate-800">₪${Number(item.amount).toLocaleString('he-IL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</span>
+                                        <button onclick="removeBudgetItem(${item.id})" class="text-slate-300 hover:text-red-500 transition-colors p-0.5">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        async function addBudgetItem(e) {
+            e.preventDefault();
+            const year = parseInt(document.getElementById('budget-year').value);
+            const month = parseInt(document.getElementById('budget-month').value);
+            const category = document.getElementById('budget-category').value;
+            const amount = parseFloat(document.getElementById('budget-amount').value);
+
+            if (!year || !month || !category || isNaN(amount)) return;
+
+            // הסרת כפילויות קודמות מאותו חודש/שנה/קטגוריה אם קיימות בזיכרון המקומי
+            budgetItems = budgetItems.filter(item => !(item.year === year && item.month === month && item.category === category));
+
+            const tempItem = { id: Date.now(), year, month, category, amount };
+            budgetItems.unshift(tempItem);
+            renderBudgetUI();
+
+            document.getElementById('budget-amount').value = '';
+
+            try {
+                // Upsert ב-Supabase (באמצעות prefer resolution)
+                const res = await fetch(`${SUPABASE_BASE_URL}/budget`, {
+                    method: 'POST',
+                    headers: {
+                        ...apiHeaders,
+                        'Prefer': 'resolution=merge-duplicates,return=representation'
+                    },
+                    body: JSON.stringify([{ year, month, category, amount }])
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data[0]) tempItem.id = data[0].id;
+                    fetchBudgetItems(); // רענון כדי לוודא סנכרון
+                }
+            } catch (err) {}
+        }
+
+        async function removeBudgetItem(id) {
+            budgetItems = budgetItems.filter(item => item.id !== id);
+            renderBudgetUI();
+            try {
+                await fetch(`${SUPABASE_BASE_URL}/budget?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
             } catch (e) {}
         }
     </script>
