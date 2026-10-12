@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול בית</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts (Rubik) -->
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+        .tab-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-20 md:pb-10">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-card shadow-sm border-b border-slate-200/80">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2.5 rounded-2xl shadow-md shadow-blue-500/20">
+                    <i data-lucide="home" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900">ניהול בית</h1>
+                    <p class="text-xs text-slate-500 font-medium">מרכז השליטה הביתי</p>
+                </div>
+            </div>
+            <!-- פרופיל / סטטוס (אופציונלי) -->
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5 animate-pulse"></span>
+                    פעיל
+                </span>
+            </div>
+        </div>
+
+        <!-- Desktop Navigation Tabs -->
+        <div class="hidden md:flex max-w-5xl mx-auto px-4 mt-2 gap-2 pb-2">
+            <button onclick="switchTab('home')" id="tab-desktop-home" class="tab-btn active px-5 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                <i data-lucide="check-square" class="w-4 h-4"></i>
+                ניהול הבית
+            </button>
+            <button onclick="switchTab('fuel')" id="tab-desktop-fuel" class="tab-btn px-5 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                <i data-lucide="fuel" class="w-4 h-4"></i>
+                דלק
+            </button>
+            <button onclick="switchTab('budget')" id="tab-desktop-budget" class="tab-btn px-5 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                <i data-lucide="wallet" class="w-4 h-4"></i>
+                תקציב
+            </button>
+            <button onclick="switchTab('garden')" id="tab-desktop-garden" class="tab-btn px-5 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                <i data-lucide="sprout" class="w-4 h-4"></i>
+                גינה
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-5xl mx-auto px-4 py-6">
+
+        <!-- Tab 1: ניהול הבית -->
+        <section id="content-home" class="tab-content block space-y-6">
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-blue-100 text-blue-600 rounded-xl">
+                        <i data-lucide="check-square" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">ניהול הבית</h2>
+                        <p class="text-xs text-slate-500">רשימת מטלות ורשימת קניות</p>
+                    </div>
+                </div>
+                <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                    <p class="text-slate-500 text-sm">התוכן של רשימת המטלות והקניות יתווסף בשלב הבא...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: דלק -->
+        <section id="content-fuel" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-amber-100 text-amber-600 rounded-xl">
+                        <i data-lucide="fuel" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">מעקב דלק ותדלוקים</h2>
+                        <p class="text-xs text-slate-500">תיעוד הוצאות דלק, קילומטראז' וצריכה</p>
+                    </div>
+                </div>
+                <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                    <p class="text-slate-500 text-sm">התוכן של מעקב התדלוקים יתווסף בשלב הבא...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 3: תקציב -->
+        <section id="content-budget" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
+                        <i data-lucide="wallet" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">מעקב תקציב והוצאות</h2>
+                        <p class="text-xs text-slate-500">ניהול הוצאות חודשיות וקטגוריות</p>
+                    </div>
+                </div>
+                <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                    <p class="text-slate-500 text-sm">התוכן של מעקב ההוצאות יתווסף בשלב הבא...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 4: גינה -->
+        <section id="content-garden" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-green-100 text-green-600 rounded-xl">
+                        <i data-lucide="sprout" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">מעקב גינה והשקיה</h2>
+                        <p class="text-xs text-slate-500">תכנון השקיה, דישון ותחזוקת הצמחים והדשא</p>
+                    </div>
+                </div>
+                <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                    <p class="text-slate-500 text-sm">התוכן של מעקב השקיית הגינה יתווסף בשלב הבא...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Mobile Navigation Bottom Bar -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 glass-card border-t border-slate-200/80 px-4 py-2 z-50">
+        <div class="flex justify-around items-center">
+            <button onclick="switchTab('home')" id="tab-mobile-home" class="mobile-tab-btn flex flex-col items-center gap-1 text-blue-600 font-medium">
+                <i data-lucide="check-square" class="w-5 h-5"></i>
+                <span class="text-[11px]">ניהול בית</span>
+            </button>
+            <button onclick="switchTab('fuel')" id="tab-mobile-fuel" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium">
+                <i data-lucide="fuel" class="w-5 h-5"></i>
+                <span class="text-[11px]">דלק</span>
+            </button>
+            <button onclick="switchTab('budget')" id="tab-mobile-budget" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium">
+                <i data-lucide="wallet" class="w-5 h-5"></i>
+                <span class="text-[11px]">תקציב</span>
+            </button>
+            <button onclick="switchTab('garden')" id="tab-mobile-garden" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium">
+                <i data-lucide="sprout" class="w-5 h-5"></i>
+                <span class="text-[11px]">גינה</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Script for Tab Switching & Lucide Icons -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Switch Tab Logic
+        function switchTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.add('hidden'));
+
+            // Show selected tab content
+            const activeContent = document.getElementById(`content-${tabName}`);
+            if (activeContent) {
+                activeContent.classList.remove('hidden');
+            }
+
+            // Update Desktop Tab Buttons
+            const desktopTabs = document.querySelectorAll('.tab-btn');
+            desktopTabs.forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-md');
+                btn.classList.add('text-slate-600');
+            });
+            const activeDesktopTab = document.getElementById(`tab-desktop-${tabName}`);
+            if (activeDesktopTab) {
+                activeDesktopTab.classList.add('active');
+            }
+
+            // Update Mobile Tab Buttons
+            const mobileTabs = document.querySelectorAll('.mobile-tab-btn');
+            mobileTabs.forEach(btn => {
+                btn.classList.remove('text-blue-600');
+                btn.classList.add('text-slate-400');
+            });
+            const activeMobileTab = document.getElementById(`tab-mobile-${tabName}`);
+            if (activeMobileTab) {
+                activeMobileTab.classList.remove('text-slate-400');
+                activeMobileTab.classList.add('text-blue-600');
+            }
+        }
+    </script>
+</body>
+</html>
