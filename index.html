@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ניהול בית - kneapps</title>
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/619/619032.png">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -456,6 +464,17 @@
         </div>
     </nav>
 
+    <!-- Service Worker Registration for PWA -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(err => {
+            console.log('SW registration failed:', err);
+          });
+        });
+      }
+    </script>
+
     <!-- Logic Script -->
     <script>
         // Direct Supabase REST API Setup
@@ -897,7 +916,6 @@
             const container = document.getElementById('garden-schedule-container');
             const today = new Date();
             
-            // הגדרת 4 קווי ההשקיה
             const lines = [
                 {
                     name: 'דשא',
@@ -906,7 +924,7 @@
                     duration: '90 דק\'',
                     color: 'emerald',
                     dotBg: 'bg-emerald-500',
-                    isDue: (date) => date.getDay() === 6 // כל שבת (Saturday = 6)
+                    isDue: (date) => date.getDay() === 6
                 },
                 {
                     name: 'שיחים',
@@ -915,7 +933,7 @@
                     duration: '30 דק\'',
                     color: 'teal',
                     dotBg: 'bg-teal-500',
-                    isDue: (date) => date.getDay() === 4 // כל חמישי (Thursday = 4)
+                    isDue: (date) => date.getDay() === 4
                 },
                 {
                     name: 'עצים',
@@ -924,9 +942,8 @@
                     duration: '20 דק\'',
                     color: 'amber',
                     dotBg: 'bg-amber-500',
-                    // כל 3 ימים (מחושב יחסית לנקודת ייחוס של יום שבת 11/10/2026)
                     isDue: (date) => {
-                        const refDate = new Date(2026, 9, 11); // Oct 11, 2026
+                        const refDate = new Date(2026, 9, 11);
                         const diffTime = Math.floor((date.setHours(0,0,0,0) - refDate.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
                         return diffTime % 3 === 0;
                     }
@@ -938,18 +955,16 @@
                     duration: '10 דק\'',
                     color: 'rose',
                     dotBg: 'bg-rose-500',
-                    isDue: (date) => date.getDay() === 4 // כל חמישי (Thursday = 4)
+                    isDue: (date) => date.getDay() === 4
                 }
             ];
 
-            // חישוב לוח הזמנים ל-7 הימים הקרובים
             let scheduleHtml = '';
 
             for (let i = 0; i < 7; i++) {
                 const targetDate = new Date();
                 targetDate.setDate(today.getDate() + i);
                 
-                // בדיקה אילו קווים פועלים ביום זה
                 const activeLines = lines.filter(line => line.isDue(new Date(targetDate)));
 
                 if (activeLines.length > 0) {
