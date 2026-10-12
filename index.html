@@ -9,7 +9,9 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ניהול בית">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/619/619032.png">
 
     <!-- Tailwind CSS CDN -->
@@ -89,6 +91,22 @@
             </button>
         </div>
     </header>
+
+    <!-- PWA Install Banner (מופיע אוטומטית במידה ואפשר להתקין) -->
+    <div id="pwa-install-banner" class="hidden max-w-3xl mx-auto px-4 mt-4">
+        <div class="bg-blue-600 text-white p-4 rounded-2xl shadow-lg flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i data-lucide="download" class="w-6 h-6"></i>
+                <div>
+                    <h4 class="font-bold text-sm">התקן את האפליקציה</h4>
+                    <p class="text-xs text-blue-100">גישה מהירה ממסך הבית בנייד</p>
+                </div>
+            </div>
+            <button id="pwa-install-btn" class="bg-white text-blue-600 px-4 py-2 rounded-xl font-bold text-xs shadow hover:bg-blue-50 transition-all">
+                התקן עכשיו
+            </button>
+        </div>
+    </div>
 
     <!-- Main Content Area -->
     <main class="max-w-3xl mx-auto px-4 py-6">
@@ -464,8 +482,10 @@
         </div>
     </nav>
 
-    <!-- Service Worker Registration for PWA -->
+    <!-- Service Worker Registration & PWA Logic -->
     <script>
+      let deferredPrompt;
+
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').catch(err => {
@@ -473,6 +493,25 @@
           });
         });
       }
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        const installBanner = document.getElementById('pwa-install-banner');
+        const installBtn = document.getElementById('pwa-install-btn');
+        
+        if (installBanner && installBtn) {
+          installBanner.classList.remove('hidden');
+          installBtn.addEventListener('click', () => {
+            installBanner.classList.add('hidden');
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+              deferredPrompt = null;
+            });
+          });
+        }
+      });
     </script>
 
     <!-- Logic Script -->
