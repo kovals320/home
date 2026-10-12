@@ -103,7 +103,6 @@
                     </span>
                 </div>
 
-                <!-- Form -->
                 <form onsubmit="addShoppingItem(event)" class="flex gap-2 mb-6">
                     <input type="text" id="shopping-input" placeholder="מה צריך לקנות? (למשל: חלב, לחם, סוללות...)" 
                         class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm bg-white/80 transition-all">
@@ -113,7 +112,6 @@
                     </button>
                 </form>
 
-                <!-- List -->
                 <div id="shopping-list" class="space-y-2.5">
                     <div class="text-center py-8 text-slate-400">טוען נתונים מהענן...</div>
                 </div>
@@ -138,7 +136,6 @@
                     </span>
                 </div>
 
-                <!-- Form -->
                 <form onsubmit="addTaskItem(event)" class="flex gap-2 mb-6">
                     <input type="text" id="task-input" placeholder="איזו מטלה צריך לבצע? (למשל: לקבוע תור, לתקן מנעול...)" 
                         class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-white/80 transition-all">
@@ -148,7 +145,6 @@
                     </button>
                 </form>
 
-                <!-- List -->
                 <div id="tasks-list" class="space-y-2.5">
                     <div class="text-center py-8 text-slate-400">טוען נתונים מהענן...</div>
                 </div>
@@ -156,21 +152,98 @@
         </section>
 
         <!-- Tab 3: דלק -->
-        <section id="content-fuel" class="tab-content hidden space-y-6">
+        <section id="content-fuel" class="tab-content hidden space-y-5">
+            
+            <!-- תדלוק אחרון -->
             <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-2 bg-amber-100 text-amber-600 rounded-xl">
-                        <i data-lucide="fuel" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800">מעקב דלק ותדלוקים</h2>
-                        <p class="text-xs text-slate-500">תיעוד הוצאות דלק, קילומטראז' וצריכה</p>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="fuel" class="w-5 h-5 text-amber-500"></i>
+                        <h2 class="text-base font-bold text-slate-800">תדלוק אחרון</h2>
+                        <span id="last-fuel-date" class="text-xs text-slate-500 font-normal">--</span>
                     </div>
                 </div>
-                <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
-                    <p class="text-slate-500 text-sm">התוכן של מעקב התדלוקים יתווסף בשלב הבא...</p>
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="bg-white/80 p-3 rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="text-xs text-slate-400 mb-1">ליטרים</div>
+                        <div id="last-fuel-liters" class="text-lg font-bold text-slate-800">--</div>
+                    </div>
+                    <div class="bg-white/80 p-3 rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="text-xs text-slate-400 mb-1">קילומטראז'</div>
+                        <div id="last-fuel-mileage" class="text-lg font-bold text-slate-800">--</div>
+                    </div>
+                    <div class="bg-white/80 p-3 rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="text-xs text-slate-400 mb-1">מחיר</div>
+                        <div id="last-fuel-price" class="text-lg font-bold text-slate-800">--</div>
+                    </div>
                 </div>
             </div>
+
+            <!-- 3 ריבועי סטטיסטיקה -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="glass-card p-4 rounded-3xl text-center border border-slate-200/60">
+                    <div class="text-[11px] font-medium text-slate-500 mb-1">מחיר ממוצע</div>
+                    <div id="stat-avg-price" class="text-base font-bold text-amber-600">--</div>
+                </div>
+                <div class="glass-card p-4 rounded-3xl text-center border border-slate-200/60">
+                    <div class="text-[11px] font-medium text-slate-500 mb-1">זמן ממוצע</div>
+                    <div id="stat-avg-days" class="text-base font-bold text-blue-600">--</div>
+                </div>
+                <div class="glass-card p-4 rounded-3xl text-center border border-slate-200/60">
+                    <div class="text-[11px] font-medium text-slate-500 mb-1">מרחק ממוצע</div>
+                    <div id="stat-avg-distance" class="text-base font-bold text-emerald-600">--</div>
+                </div>
+            </div>
+
+            <!-- טופס דיווח תדלוק -->
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-amber-500"></i>
+                    דיווח תדלוק חדש
+                </h3>
+                <form onsubmit="addFuelItem(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">תאריך תדלוק</label>
+                        <input type="date" id="fuel-date" required
+                            class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">ליטרים</label>
+                            <input type="number" step="0.01" id="fuel-liters" placeholder="44.01" required
+                                class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 mb-1">מחיר (₪)</label>
+                            <input type="number" step="0.01" id="fuel-price" placeholder="352.50" required
+                                class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">קילומטראז'</label>
+                        <input type="number" id="fuel-mileage" placeholder="174169" required
+                            class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500">
+                    </div>
+                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white py-3 rounded-2xl font-medium text-sm shadow-md shadow-amber-500/20 flex items-center justify-center gap-2 transition-all mt-2">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        דווח תדלוק
+                    </button>
+                </form>
+            </div>
+
+            <!-- היסטוריית תדלוקים -->
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center justify-between">
+                    <span>היסטוריית תדלוקים</span>
+                    <span id="fuel-count" class="text-xs font-semibold bg-amber-50 text-amber-700 px-3 py-1 rounded-full border border-amber-200">
+                        0 תדלוקים
+                    </span>
+                </h3>
+                <div id="fuel-list" class="space-y-2.5">
+                    <div class="text-center py-8 text-slate-400">טוען תדלוקים...</div>
+                </div>
+            </div>
+
         </section>
 
         <!-- Tab 4: תקציב -->
@@ -253,12 +326,15 @@
         // State Variables
         let shoppingItems = [];
         let taskItems = [];
+        let fuelItems = [];
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            document.getElementById('fuel-date').valueAsDate = new Date();
             fetchShoppingItems();
             fetchTaskItems();
+            fetchFuelItems();
         });
 
         // Tab Switch
@@ -288,45 +364,32 @@
         // --- Shopping Logic ---
         async function fetchShoppingItems() {
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/shopping?select=*&order=created_at.desc`, {
-                    headers: apiHeaders
-                });
-                if (res.ok) {
-                    shoppingItems = await res.json();
-                }
-            } catch (e) {
-                console.error('Fetch error:', e);
-            }
+                const res = await fetch(`${SUPABASE_BASE_URL}/shopping?select=*&order=created_at.desc`, { headers: apiHeaders });
+                if (res.ok) shoppingItems = await res.json();
+            } catch (e) {}
             renderShoppingList();
         }
 
         function renderShoppingList() {
             const listEl = document.getElementById('shopping-list');
-            const countEl = document.getElementById('shopping-count');
-            countEl.textContent = `${shoppingItems.length} מוצרים`;
+            document.getElementById('shopping-count').textContent = `${shoppingItems.length} מוצרים`;
 
             if (shoppingItems.length === 0) {
-                listEl.innerHTML = `
-                    <div class="text-center py-8 text-slate-400">
-                        <i data-lucide="check-circle-2" class="w-10 h-10 mx-auto mb-2 stroke-[1.5] text-slate-300"></i>
-                        <p class="text-sm font-medium">אין מוצרים ברשימת הקניות!</p>
-                    </div>`;
+                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><i data-lucide="check-circle-2" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i><p class="text-sm">אין מוצרים ברשימת הקניות!</p></div>`;
                 lucide.createIcons();
                 return;
             }
 
             listEl.innerHTML = shoppingItems.map((item) => `
-                <div onclick="removeShoppingItem(${item.id})" 
-                     class="item-card bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between cursor-pointer group transition-all">
+                <div onclick="removeShoppingItem(${item.id})" class="item-card bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between cursor-pointer group">
                     <div class="flex items-center gap-3">
-                        <div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-blue-600 group-hover:bg-blue-600 flex items-center justify-center transition-all text-white shrink-0">
-                            <i data-lucide="check" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        <div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-blue-600 group-hover:bg-blue-600 flex items-center justify-center text-white shrink-0">
+                            <i data-lucide="check" class="w-3 h-3 opacity-0 group-hover:opacity-100"></i>
                         </div>
-                        <span class="text-sm font-medium text-slate-800 group-hover:text-slate-500 group-hover:line-through transition-all">${item.title}</span>
+                        <span class="text-sm font-medium text-slate-800 group-hover:text-slate-500 group-hover:line-through">${item.title}</span>
                     </div>
                 </div>
             `).join('');
-
             lucide.createIcons();
         }
 
@@ -342,78 +405,49 @@
             input.value = '';
 
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/shopping`, {
-                    method: 'POST',
-                    headers: apiHeaders,
-                    body: JSON.stringify({ title: value })
-                });
+                const res = await fetch(`${SUPABASE_BASE_URL}/shopping`, { method: 'POST', headers: apiHeaders, body: JSON.stringify({ title: value }) });
                 if (res.ok) {
                     const data = await res.json();
-                    if (data && data[0]) {
-                        tempItem.id = data[0].id;
-                    }
+                    if (data && data[0]) tempItem.id = data[0].id;
                 }
-            } catch (err) {
-                console.error('Error adding shopping item:', err);
-            }
+            } catch (err) {}
         }
 
         async function removeShoppingItem(id) {
             shoppingItems = shoppingItems.filter(item => item.id !== id);
             renderShoppingList();
-
-            try {
-                await fetch(`${SUPABASE_BASE_URL}/shopping?id=eq.${id}`, {
-                    method: 'DELETE',
-                    headers: apiHeaders
-                });
-            } catch (e) {
-                console.error('Error deleting shopping item:', e);
-            }
+            try { await fetch(`${SUPABASE_BASE_URL}/shopping?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders }); } catch (e) {}
         }
 
         // --- Tasks Logic ---
         async function fetchTaskItems() {
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/tasks?select=*&order=created_at.desc`, {
-                    headers: apiHeaders
-                });
-                if (res.ok) {
-                    taskItems = await res.json();
-                }
-            } catch (e) {
-                console.error('Fetch tasks error:', e);
-            }
+                const res = await fetch(`${SUPABASE_BASE_URL}/tasks?select=*&order=created_at.desc`, { headers: apiHeaders });
+                if (res.ok) taskItems = await res.json();
+            } catch (e) {}
             renderTasksList();
         }
 
         function renderTasksList() {
             const listEl = document.getElementById('tasks-list');
-            const countEl = document.getElementById('tasks-count');
-            countEl.textContent = `${taskItems.length} מטלות`;
+            document.getElementById('tasks-count').textContent = `${taskItems.length} מטלות`;
 
             if (taskItems.length === 0) {
-                listEl.innerHTML = `
-                    <div class="text-center py-8 text-slate-400">
-                        <i data-lucide="sparkles" class="w-10 h-10 mx-auto mb-2 stroke-[1.5] text-slate-300"></i>
-                        <p class="text-sm font-medium">אין מטלות פתוחות. כל הכבוד!</p>
-                    </div>`;
+                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><i data-lucide="sparkles" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i><p class="text-sm">אין מטלות פתוחות. כל הכבוד!</p></div>`;
                 lucide.createIcons();
                 return;
             }
 
             listEl.innerHTML = taskItems.map((item) => `
-                <div onclick="removeTaskItem(${item.id})" 
-                     class="item-card bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between cursor-pointer group transition-all">
+                <div onclick="removeTaskItem(${item.id})" class="item-card bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between cursor-pointer group">
                     <div class="flex items-center gap-3">
-                        <div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-600 group-hover:bg-indigo-600 flex items-center justify-center transition-all text-white shrink-0">
-                            <i data-lucide="check" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        <div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-600 group-hover:bg-indigo-600 flex items-center justify-center text-white shrink-0">
+                            <i data-lucide="check" class="w-3 h-3 opacity-0 group-hover:opacity-100"></i>
                         </div>
-                        <span class="text-sm font-medium text-slate-800 group-hover:text-slate-500 group-hover:line-through transition-all">${item.title}</span>
+                        <span class="text-sm font-medium text-slate-800 group-hover:text-slate-500 group-hover:line-through">${item.title}</span>
                     </div>
                 </div>
             `).join('');
-
             lucide.createIcons();
         }
 
@@ -429,34 +463,142 @@
             input.value = '';
 
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/tasks`, {
-                    method: 'POST',
-                    headers: apiHeaders,
-                    body: JSON.stringify({ title: value })
-                });
+                const res = await fetch(`${SUPABASE_BASE_URL}/tasks`, { method: 'POST', headers: apiHeaders, body: JSON.stringify({ title: value }) });
                 if (res.ok) {
                     const data = await res.json();
-                    if (data && data[0]) {
-                        tempItem.id = data[0].id;
-                    }
+                    if (data && data[0]) tempItem.id = data[0].id;
                 }
-            } catch (e) {
-                console.error('Error adding task:', e);
-            }
+            } catch (e) {}
         }
 
         async function removeTaskItem(id) {
             taskItems = taskItems.filter(item => item.id !== id);
             renderTasksList();
+            try { await fetch(`${SUPABASE_BASE_URL}/tasks?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders }); } catch (e) {}
+        }
+
+        // --- Fuel Logic ---
+        async function fetchFuelItems() {
+            try {
+                const res = await fetch(`${SUPABASE_BASE_URL}/fuel?select=*&order=date.desc,created_at.desc`, { headers: apiHeaders });
+                if (res.ok) fuelItems = await res.json();
+            } catch (e) {}
+            renderFuelUI();
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '--';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('he-IL', { year: 'numeric', month: 'short', day: 'numeric', weekday: 'short' });
+        }
+
+        function renderFuelUI() {
+            const listEl = document.getElementById('fuel-list');
+            document.getElementById('fuel-count').textContent = `${fuelItems.length} תדלוקים`;
+
+            if (fuelItems.length === 0) {
+                document.getElementById('last-fuel-date').textContent = 'אין נתונים';
+                document.getElementById('last-fuel-liters').textContent = '--';
+                document.getElementById('last-fuel-mileage').textContent = '--';
+                document.getElementById('last-fuel-price').textContent = '--';
+                document.getElementById('stat-avg-price').textContent = '--';
+                document.getElementById('stat-avg-days').textContent = '--';
+                document.getElementById('stat-avg-distance').textContent = '--';
+
+                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><i data-lucide="fuel" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i><p class="text-sm">טרם הוגדרו דיווחי תדלוק</p></div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            // תדלוק אחרון (הראשון ברשימה הממוינת בסדר יורד)
+            const last = fuelItems[0];
+            document.getElementById('last-fuel-date').textContent = `— ${formatDate(last.date)}`;
+            document.getElementById('last-fuel-liters').textContent = last.liters;
+            document.getElementById('last-fuel-mileage').textContent = Number(last.mileage).toLocaleString();
+            document.getElementById('last-fuel-price').textContent = `₪${Number(last.price).toFixed(2)}`;
+
+            // חישוב ממוצעים
+            const totalPrice = fuelItems.reduce((acc, curr) => acc + Number(curr.price), 0);
+            const avgPrice = (totalPrice / fuelItems.length).toFixed(2);
+            document.getElementById('stat-avg-price').textContent = `₪${avgPrice}`;
+
+            if (fuelItems.length > 1) {
+                // המרחק הכולל בין התדלוק הראשון לאחרון
+                const sortedByDate = [...fuelItems].sort((a, b) => new Date(a.date) - new Date(b.date));
+                const totalDist = sortedByDate[sortedByDate.length - 1].mileage - sortedByDate[0].mileage;
+                const avgDist = Math.round(totalDist / (fuelItems.length - 1));
+                document.getElementById('stat-avg-distance').textContent = `${avgDist.toLocaleString()} ק"מ`;
+
+                // הזמן הכולל בימים
+                const firstDate = new Date(sortedByDate[0].date);
+                const lastDate = new Date(sortedByDate[sortedByDate.length - 1].date);
+                const totalDays = Math.max(1, Math.round((lastDate - firstDate) / (1000 * 60 * 60 * 24)));
+                const avgDays = (totalDays / (fuelItems.length - 1)).toFixed(1);
+                document.getElementById('stat-avg-days').textContent = `${avgDays} ימים`;
+            } else {
+                document.getElementById('stat-avg-distance').textContent = '--';
+                document.getElementById('stat-avg-days').textContent = '--';
+            }
+
+            // היסטוריית תדלוקים
+            listEl.innerHTML = fuelItems.map((item) => `
+                <div class="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <div class="text-xs font-semibold text-slate-800 mb-0.5">${formatDate(item.date)}</div>
+                        <div class="text-xs text-slate-500">
+                            ${item.liters} ליטר • ${Number(item.mileage).toLocaleString()} ק"מ
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-bold text-slate-800">₪${Number(item.price).toFixed(2)}</span>
+                        <button onclick="removeFuelItem(${item.id})" class="text-slate-300 hover:text-red-500 transition-colors p-1">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        async function addFuelItem(e) {
+            e.preventDefault();
+            const date = document.getElementById('fuel-date').value;
+            const liters = parseFloat(document.getElementById('fuel-liters').value);
+            const price = parseFloat(document.getElementById('fuel-price').value);
+            const mileage = parseInt(document.getElementById('fuel-mileage').value);
+
+            if (!date || isNaN(liters) || isNaN(price) || isNaN(mileage)) return;
+
+            const tempItem = { id: Date.now(), date, liters, price, mileage };
+            fuelItems.unshift(tempItem);
+            fuelItems.sort((a, b) => new Date(b.date) - new Date(a.date));
+            renderFuelUI();
+
+            // איפוס שדות הטופס
+            document.getElementById('fuel-liters').value = '';
+            document.getElementById('fuel-price').value = '';
+            document.getElementById('fuel-mileage').value = '';
 
             try {
-                await fetch(`${SUPABASE_BASE_URL}/tasks?id=eq.${id}`, {
-                    method: 'DELETE',
-                    headers: apiHeaders
+                const res = await fetch(`${SUPABASE_BASE_URL}/fuel`, {
+                    method: 'POST',
+                    headers: apiHeaders,
+                    body: JSON.stringify({ date, liters, price, mileage })
                 });
-            } catch (e) {
-                console.error('Error deleting task:', e);
-            }
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data[0]) tempItem.id = data[0].id;
+                }
+            } catch (err) {}
+        }
+
+        async function removeFuelItem(id) {
+            fuelItems = fuelItems.filter(item => item.id !== id);
+            renderFuelUI();
+            try {
+                await fetch(`${SUPABASE_BASE_URL}/fuel?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
+            } catch (e) {}
         }
     </script>
 </body>
