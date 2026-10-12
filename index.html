@@ -95,7 +95,7 @@
                         </div>
                         <div>
                             <h2 class="text-lg font-bold text-slate-800">רשימת קניות</h2>
-                            <p class="text-xs text-slate-500">לחץ על מוצר כדי לסמן/למחוק אותו לאחר הקנייה</p>
+                            <p class="text-xs text-slate-500">לחץ על מוצר כדי למחוק אותו מהרשימה</p>
                         </div>
                     </div>
                     <span id="shopping-count" class="text-xs font-semibold bg-blue-50 text-blue-700 px-3 py-1 rounded-full border border-blue-200">
@@ -293,8 +293,6 @@
                 });
                 if (res.ok) {
                     shoppingItems = await res.json();
-                } else {
-                    console.warn('API error:', await res.text());
                 }
             } catch (e) {
                 console.error('Fetch error:', e);
@@ -319,17 +317,13 @@
 
             listEl.innerHTML = shoppingItems.map((item) => `
                 <div onclick="removeShoppingItem(${item.id})" 
-                     class="item-card bg-white hover:bg-red-50/60 border border-slate-200/80 hover:border-red-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer group transition-all">
+                     class="item-card bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between cursor-pointer group transition-all">
                     <div class="flex items-center gap-3">
-                        <div class="w-5 h-5 rounded-lg border-2 border-slate-300 group-hover:border-red-500 group-hover:bg-red-500 flex items-center justify-center transition-all text-white">
-                            <i data-lucide="check" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        <div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-blue-600 group-hover:bg-blue-600 flex items-center justify-center transition-all text-white shrink-0">
+                            <i data-lucide="check" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
                         </div>
-                        <span class="text-sm font-medium text-slate-800 group-hover:text-red-700 group-hover:line-through transition-all">${item.title}</span>
+                        <span class="text-sm font-medium text-slate-800 group-hover:text-slate-500 group-hover:line-through transition-all">${item.title}</span>
                     </div>
-                    <span class="text-xs text-slate-400 group-hover:text-red-500 font-medium flex items-center gap-1">
-                        לחץ לסיום
-                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                    </span>
                 </div>
             `).join('');
 
@@ -410,17 +404,13 @@
 
             listEl.innerHTML = taskItems.map((item) => `
                 <div onclick="removeTaskItem(${item.id})" 
-                     class="item-card bg-white hover:bg-emerald-50/60 border border-slate-200/80 hover:border-emerald-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer group transition-all">
+                     class="item-card bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between cursor-pointer group transition-all">
                     <div class="flex items-center gap-3">
-                        <div class="w-5 h-5 rounded-lg border-2 border-slate-300 group-hover:border-emerald-500 group-hover:bg-emerald-500 flex items-center justify-center transition-all text-white">
-                            <i data-lucide="check" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        <div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-600 group-hover:bg-indigo-600 flex items-center justify-center transition-all text-white shrink-0">
+                            <i data-lucide="check" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
                         </div>
-                        <span class="text-sm font-medium text-slate-800 group-hover:text-emerald-700 group-hover:line-through transition-all">${item.title}</span>
+                        <span class="text-sm font-medium text-slate-800 group-hover:text-slate-500 group-hover:line-through transition-all">${item.title}</span>
                     </div>
-                    <span class="text-xs text-slate-400 group-hover:text-emerald-600 font-medium flex items-center gap-1">
-                        לחץ לסיום
-                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-                    </span>
                 </div>
             `).join('');
 
