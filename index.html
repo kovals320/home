@@ -101,7 +101,7 @@
                         </div>
                     </div>
                     <span id="shopping-count" class="text-xs font-semibold bg-blue-50 text-blue-700 px-3 py-1 rounded-full border border-blue-200">
-                        טוען...
+                        0 מוצרים
                     </span>
                 </div>
 
@@ -136,7 +136,7 @@
                         </div>
                     </div>
                     <span id="tasks-count" class="text-xs font-semibold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-200">
-                        טוען...
+                        0 מטלות
                     </span>
                 </div>
 
@@ -243,8 +243,13 @@
     <script>
         // Supabase Setup
         const SUPABASE_URL = 'https://pjujibzoscawmstarerz.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_5mK3Md5VCpXjHTSgVv68GQ_8kmPbg83';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // הדבק כאן את מפתח ה-anon שנשאר שמתחיל ב-eyJ...
+        const SUPABASE_KEY = 'YOUR_ANON_KEY_HERE';
+        
+        let supabase = null;
+        if (window.supabase && SUPABASE_KEY !== 'YOUR_ANON_KEY_HERE') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
         // State Variables
         let shoppingItems = [];
@@ -257,7 +262,7 @@
             fetchTaskItems();
         });
 
-        // Tab Switch
+        // Tab Switch (תמיד פועל ולוגית עצמאית)
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             const activeContent = document.getElementById(`content-${tabName}`);
@@ -283,15 +288,23 @@
 
         // --- Shopping Logic ---
         async function fetchShoppingItems() {
-            const { data, error } = await supabase
-                .from('shopping')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (!error && data) {
-                shoppingItems = data;
+            if (!supabase) {
                 renderShoppingList();
+                return;
             }
+            try {
+                const { data, error } = await supabase
+                    .from('shopping')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (!error && data) {
+                    shoppingItems = data;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+            renderShoppingList();
         }
 
         function renderShoppingList() {
@@ -332,7 +345,9 @@
             e.preventDefault();
             const input = document.getElementById('shopping-input');
             const value = input.value.trim();
-            if (value) {
+            if (!value) return;
+
+            if (supabase) {
                 const { data, error } = await supabase
                     .from('shopping')
                     .insert([{ title: value }])
@@ -340,35 +355,41 @@
 
                 if (!error && data) {
                     shoppingItems.unshift(data[0]);
-                    input.value = '';
-                    renderShoppingList();
                 }
+            } else {
+                shoppingItems.unshift({ id: Date.now(), title: value });
             }
+            input.value = '';
+            renderShoppingList();
         }
 
         async function removeShoppingItem(id) {
-            const { error } = await supabase
-                .from('shopping')
-                .delete()
-                .eq('id', id);
-
-            if (!error) {
-                shoppingItems = shoppingItems.filter(item => item.id !== id);
-                renderShoppingList();
+            if (supabase) {
+                await supabase.from('shopping').delete().eq('id', id);
             }
+            shoppingItems = shoppingItems.filter(item => item.id !== id);
+            renderShoppingList();
         }
 
         // --- Tasks Logic ---
         async function fetchTaskItems() {
-            const { data, error } = await supabase
-                .from('tasks')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (!error && data) {
-                taskItems = data;
+            if (!supabase) {
                 renderTasksList();
+                return;
             }
+            try {
+                const { data, error } = await supabase
+                    .from('tasks')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (!error && data) {
+                    taskItems = data;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+            renderTasksList();
         }
 
         function renderTasksList() {
@@ -409,7 +430,9 @@
             e.preventDefault();
             const input = document.getElementById('task-input');
             const value = input.value.trim();
-            if (value) {
+            if (!value) return;
+
+            if (supabase) {
                 const { data, error } = await supabase
                     .from('tasks')
                     .insert([{ title: value }])
@@ -417,22 +440,20 @@
 
                 if (!error && data) {
                     taskItems.unshift(data[0]);
-                    input.value = '';
-                    renderTasksList();
                 }
+            } else {
+                taskItems.unshift({ id: Date.now(), title: value });
             }
+            input.value = '';
+            renderTasksList();
         }
 
         async function removeTaskItem(id) {
-            const { error } = await supabase
-                .from('tasks')
-                .delete()
-                .eq('id', id);
-
-            if (!error) {
-                taskItems = taskItems.filter(item => item.id !== id);
-                renderTasksList();
+            if (supabase) {
+                await supabase.from('tasks').delete().eq('id', id);
             }
+            taskItems = taskItems.filter(item => item.id !== id);
+            renderTasksList();
         }
     </script>
 </body>
