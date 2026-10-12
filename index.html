@@ -1,1 +1,466 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול בית - kneapps</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Google Fonts (Rubik) -->
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+        .tab-btn.active {
+            background-color: #2563eb;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+        .item-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .item-card:hover {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-24 md:pb-10">
 
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-card shadow-sm border-b border-slate-200/80">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2.5 rounded-2xl shadow-md shadow-blue-500/20">
+                    <i data-lucide="home" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900">ניהול בית</h1>
+                    <p class="text-xs text-slate-500 font-medium">kneapps.fyi</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span id="db-status" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5 animate-pulse"></span>
+                    מחובר לענן
+                </span>
+            </div>
+        </div>
+
+        <!-- Desktop Navigation Tabs -->
+        <div class="hidden md:flex max-w-5xl mx-auto px-4 mt-2 gap-2 pb-2 overflow-x-auto">
+            <button onclick="switchTab('shopping')" id="tab-desktop-shopping" class="tab-btn active px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                קניות
+            </button>
+            <button onclick="switchTab('tasks')" id="tab-desktop-tasks" class="tab-btn px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                <i data-lucide="check-square" class="w-4 h-4"></i>
+                מטלות
+            </button>
+            <button onclick="switchTab('fuel')" id="tab-desktop-fuel" class="tab-btn px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                <i data-lucide="fuel" class="w-4 h-4"></i>
+                דלק
+            </button>
+            <button onclick="switchTab('budget')" id="tab-desktop-budget" class="tab-btn px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                <i data-lucide="wallet" class="w-4 h-4"></i>
+                תקציב
+            </button>
+            <button onclick="switchTab('garden')" id="tab-desktop-garden" class="tab-btn px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
+                <i data-lucide="sprout" class="w-4 h-4"></i>
+                גינה
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-3xl mx-auto px-4 py-6">
+
+        <!-- Tab 1: קניות -->
+        <section id="content-shopping" class="tab-content block space-y-5">
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-blue-100 text-blue-600 rounded-xl">
+                            <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">רשימת קניות</h2>
+                            <p class="text-xs text-slate-500">לחץ על מוצר כדי לסמן/למחוק אותו לאחר הקנייה</p>
+                        </div>
+                    </div>
+                    <span id="shopping-count" class="text-xs font-semibold bg-blue-50 text-blue-700 px-3 py-1 rounded-full border border-blue-200">
+                        0 מוצרים
+                    </span>
+                </div>
+
+                <!-- Form -->
+                <form onsubmit="addShoppingItem(event)" class="flex gap-2 mb-6">
+                    <input type="text" id="shopping-input" placeholder="מה צריך לקנות? (למשל: חלב, לחם, סוללות...)" 
+                        class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm bg-white/80 transition-all">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-5 py-3 rounded-2xl font-medium text-sm shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all shrink-0">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        הוסף
+                    </button>
+                </form>
+
+                <!-- List -->
+                <div id="shopping-list" class="space-y-2.5">
+                    <div class="text-center py-8 text-slate-400">טוען נתונים מהענן...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 2: מטלות -->
+        <section id="content-tasks" class="tab-content hidden space-y-5">
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-indigo-100 text-indigo-600 rounded-xl">
+                            <i data-lucide="check-square" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">רשימת מטלות</h2>
+                            <p class="text-xs text-slate-500">לחץ על מטלה כדי למחוק אותה לאחר הביצוע</p>
+                        </div>
+                    </div>
+                    <span id="tasks-count" class="text-xs font-semibold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-200">
+                        0 מטלות
+                    </span>
+                </div>
+
+                <!-- Form -->
+                <form onsubmit="addTaskItem(event)" class="flex gap-2 mb-6">
+                    <input type="text" id="task-input" placeholder="איזו מטלה צריך לבצע? (למשל: לקבוע תור, לתקן מנעול...)" 
+                        class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-white/80 transition-all">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-5 py-3 rounded-2xl font-medium text-sm shadow-md shadow-indigo-500/20 flex items-center gap-1.5 transition-all shrink-0">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        הוסף
+                    </button>
+                </form>
+
+                <!-- List -->
+                <div id="tasks-list" class="space-y-2.5">
+                    <div class="text-center py-8 text-slate-400">טוען נתונים מהענן...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 3: דלק -->
+        <section id="content-fuel" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-amber-100 text-amber-600 rounded-xl">
+                        <i data-lucide="fuel" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">מעקב דלק ותדלוקים</h2>
+                        <p class="text-xs text-slate-500">תיעוד הוצאות דלק, קילומטראז' וצריכה</p>
+                    </div>
+                </div>
+                <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                    <p class="text-slate-500 text-sm">התוכן של מעקב התדלוקים יתווסף בשלב הבא...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 4: תקציב -->
+        <section id="content-budget" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
+                        <i data-lucide="wallet" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">מעקב תקציב והוצאות</h2>
+                        <p class="text-xs text-slate-500">ניהול הוצאות חודשיות וקטגוריות</p>
+                    </div>
+                </div>
+                <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                    <p class="text-slate-500 text-sm">התוכן של מעקב ההוצאות יתווסף בשלב הבא...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 5: גינה -->
+        <section id="content-garden" class="tab-content hidden space-y-6">
+            <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-green-100 text-green-600 rounded-xl">
+                        <i data-lucide="sprout" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">מעקב גינה והשקיה</h2>
+                        <p class="text-xs text-slate-500">תכנון השקיה, דישון ותחזוקת הצמחים והדשא</p>
+                    </div>
+                </div>
+                <div class="p-8 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                    <p class="text-slate-500 text-sm">התוכן של מעקב השקיית הגינה יתווסף בשלב הבא...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Mobile Navigation Bottom Bar -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 glass-card border-t border-slate-200/80 px-2 py-2 z-50">
+        <div class="flex justify-around items-center max-w-md mx-auto">
+            <button onclick="switchTab('shopping')" id="tab-mobile-shopping" class="mobile-tab-btn flex flex-col items-center gap-1 text-blue-600 font-medium">
+                <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                <span class="text-[10px]">קניות</span>
+            </button>
+            <button onclick="switchTab('tasks')" id="tab-mobile-tasks" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium">
+                <i data-lucide="check-square" class="w-5 h-5"></i>
+                <span class="text-[10px]">מטלות</span>
+            </button>
+            <button onclick="switchTab('fuel')" id="tab-mobile-fuel" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium">
+                <i data-lucide="fuel" class="w-5 h-5"></i>
+                <span class="text-[10px]">דלק</span>
+            </button>
+            <button onclick="switchTab('budget')" id="tab-mobile-budget" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium">
+                <i data-lucide="wallet" class="w-5 h-5"></i>
+                <span class="text-[10px]">תקציב</span>
+            </button>
+            <button onclick="switchTab('garden')" id="tab-mobile-garden" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium">
+                <i data-lucide="sprout" class="w-5 h-5"></i>
+                <span class="text-[10px]">גינה</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Logic Script -->
+    <script>
+        // Supabase Setup
+        const SUPABASE_URL = 'https://pjujibzoscawmstarerz.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_5mK3Md5VCpXjHTSgVv68GQ_8kmPbg83';
+        
+        let supabase = null;
+        if (window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
+        // State Variables
+        let shoppingItems = [];
+        let taskItems = [];
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            fetchShoppingItems();
+            fetchTaskItems();
+        });
+
+        // Tab Switch
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const activeContent = document.getElementById(`content-${tabName}`);
+            if (activeContent) activeContent.classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-md');
+                btn.classList.add('text-slate-600');
+            });
+            const activeDesktopTab = document.getElementById(`tab-desktop-${tabName}`);
+            if (activeDesktopTab) activeDesktopTab.classList.add('active');
+
+            document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600');
+                btn.classList.add('text-slate-400');
+            });
+            const activeMobileTab = document.getElementById(`tab-mobile-${tabName}`);
+            if (activeMobileTab) {
+                activeMobileTab.classList.remove('text-slate-400');
+                activeMobileTab.classList.add('text-blue-600');
+            }
+        }
+
+        // --- Shopping Logic ---
+        async function fetchShoppingItems() {
+            if (supabase) {
+                try {
+                    const fetchPromise = supabase.from('shopping').select('*').order('created_at', { ascending: false });
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('timeout'), 2000));
+                    
+                    const res = await Promise.race([fetchPromise, timeoutPromise]);
+                    if (res && !res.error && res.data) {
+                        shoppingItems = res.data;
+                    }
+                } catch (e) {
+                    console.warn('Offline mode enabled');
+                    document.getElementById('db-status').innerHTML = `
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 ml-1.5"></span>
+                        מצב מקומי
+                    `;
+                    document.getElementById('db-status').className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200";
+                }
+            }
+            renderShoppingList();
+        }
+
+        function renderShoppingList() {
+            const listEl = document.getElementById('shopping-list');
+            const countEl = document.getElementById('shopping-count');
+            countEl.textContent = `${shoppingItems.length} מוצרים`;
+
+            if (shoppingItems.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-8 text-slate-400">
+                        <i data-lucide="check-circle-2" class="w-10 h-10 mx-auto mb-2 stroke-[1.5] text-slate-300"></i>
+                        <p class="text-sm font-medium">אין מוצרים ברשימת הקניות!</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            listEl.innerHTML = shoppingItems.map((item) => `
+                <div onclick="removeShoppingItem(${item.id})" 
+                     class="item-card bg-white hover:bg-red-50/60 border border-slate-200/80 hover:border-red-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer group transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="w-5 h-5 rounded-lg border-2 border-slate-300 group-hover:border-red-500 group-hover:bg-red-500 flex items-center justify-center transition-all text-white">
+                            <i data-lucide="check" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        </div>
+                        <span class="text-sm font-medium text-slate-800 group-hover:text-red-700 group-hover:line-through transition-all">${item.title}</span>
+                    </div>
+                    <span class="text-xs text-slate-400 group-hover:text-red-500 font-medium flex items-center gap-1">
+                        לחץ לסיום
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </span>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        async function addShoppingItem(e) {
+            e.preventDefault();
+            const input = document.getElementById('shopping-input');
+            const value = input.value.trim();
+            if (!value) return;
+
+            const newItem = { id: Date.now(), title: value };
+            shoppingItems.unshift(newItem);
+            renderShoppingList();
+            input.value = '';
+
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase
+                        .from('shopping')
+                        .insert([{ title: value }])
+                        .select();
+                    if (!error && data && data[0]) {
+                        newItem.id = data[0].id;
+                    }
+                } catch(err) {}
+            }
+        }
+
+        async function removeShoppingItem(id) {
+            shoppingItems = shoppingItems.filter(item => item.id !== id);
+            renderShoppingList();
+
+            if (supabase) {
+                try {
+                    await supabase.from('shopping').delete().eq('id', id);
+                } catch(e) {}
+            }
+        }
+
+        // --- Tasks Logic ---
+        async function fetchTaskItems() {
+            if (supabase) {
+                try {
+                    const fetchPromise = supabase.from('tasks').select('*').order('created_at', { ascending: false });
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('timeout'), 2000));
+
+                    const res = await Promise.race([fetchPromise, timeoutPromise]);
+                    if (res && !res.error && res.data) {
+                        taskItems = res.data;
+                    }
+                } catch (e) {}
+            }
+            renderTasksList();
+        }
+
+        function renderTasksList() {
+            const listEl = document.getElementById('tasks-list');
+            const countEl = document.getElementById('tasks-count');
+            countEl.textContent = `${taskItems.length} מטלות`;
+
+            if (taskItems.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-8 text-slate-400">
+                        <i data-lucide="sparkles" class="w-10 h-10 mx-auto mb-2 stroke-[1.5] text-slate-300"></i>
+                        <p class="text-sm font-medium">אין מטלות פתוחות. כל הכבוד!</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            listEl.innerHTML = taskItems.map((item) => `
+                <div onclick="removeTaskItem(${item.id})" 
+                     class="item-card bg-white hover:bg-emerald-50/60 border border-slate-200/80 hover:border-emerald-200 rounded-2xl p-4 flex items-center justify-between cursor-pointer group transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="w-5 h-5 rounded-lg border-2 border-slate-300 group-hover:border-emerald-500 group-hover:bg-emerald-500 flex items-center justify-center transition-all text-white">
+                            <i data-lucide="check" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        </div>
+                        <span class="text-sm font-medium text-slate-800 group-hover:text-emerald-700 group-hover:line-through transition-all">${item.title}</span>
+                    </div>
+                    <span class="text-xs text-slate-400 group-hover:text-emerald-600 font-medium flex items-center gap-1">
+                        לחץ לסיום
+                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                    </span>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        async function addTaskItem(e) {
+            e.preventDefault();
+            const input = document.getElementById('task-input');
+            const value = input.value.trim();
+            if (!value) return;
+
+            const newItem = { id: Date.now(), title: value };
+            taskItems.unshift(newItem);
+            renderTasksList();
+            input.value = '';
+
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase
+                        .from('tasks')
+                        .insert([{ title: value }])
+                        .select();
+                    if (!error && data && data[0]) {
+                        newItem.id = data[0].id;
+                    }
+                } catch(e) {}
+            }
+        }
+
+        async function removeTaskItem(id) {
+            taskItems = taskItems.filter(item => item.id !== id);
+            renderTasksList();
+
+            if (supabase) {
+                try {
+                    await supabase.from('tasks').delete().eq('id', id);
+                } catch(e) {}
+            }
+        }
+    </script>
+</body>
+</html>
