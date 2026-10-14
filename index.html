@@ -578,7 +578,7 @@
         // --- Shopping Logic ---
         async function fetchShoppingItems() {
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/shopping?select=*&order=created_at.desc`, { headers: apiHeaders });
+                const res = await fetch(`${SUPABASE_BASE_URL}/home_shopping?select=*&order=created_at.desc`, { headers: apiHeaders });
                 if (res.ok) shoppingItems = await res.json();
             } catch (e) {}
             renderShoppingList();
@@ -619,7 +619,7 @@
             input.value = '';
 
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/shopping`, { method: 'POST', headers: apiHeaders, body: JSON.stringify({ title: value }) });
+                const res = await fetch(`${SUPABASE_BASE_URL}/home_shopping`, { method: 'POST', headers: apiHeaders, body: JSON.stringify({ title: value }) });
                 if (res.ok) {
                     const data = await res.json();
                     if (data && data[0]) tempItem.id = data[0].id;
@@ -630,13 +630,13 @@
         async function removeShoppingItem(id) {
             shoppingItems = shoppingItems.filter(item => item.id !== id);
             renderShoppingList();
-            try { await fetch(`${SUPABASE_BASE_URL}/shopping?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders }); } catch (e) {}
+            try { await fetch(`${SUPABASE_BASE_URL}/home_shopping?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders }); } catch (e) {}
         }
 
         // --- Tasks Logic ---
         async function fetchTaskItems() {
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/tasks?select=*&order=created_at.desc`, { headers: apiHeaders });
+                const res = await fetch(`${SUPABASE_BASE_URL}/home_tasks?select=*&order=created_at.desc`, { headers: apiHeaders });
                 if (res.ok) taskItems = await res.json();
             } catch (e) {}
             renderTasksList();
@@ -677,7 +677,7 @@
             input.value = '';
 
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/tasks`, { method: 'POST', headers: apiHeaders, body: JSON.stringify({ title: value }) });
+                const res = await fetch(`${SUPABASE_BASE_URL}/home_tasks`, { method: 'POST', headers: apiHeaders, body: JSON.stringify({ title: value }) });
                 if (res.ok) {
                     const data = await res.json();
                     if (data && data[0]) tempItem.id = data[0].id;
@@ -688,13 +688,13 @@
         async function removeTaskItem(id) {
             taskItems = taskItems.filter(item => item.id !== id);
             renderTasksList();
-            try { await fetch(`${SUPABASE_BASE_URL}/tasks?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders }); } catch (e) {}
+            try { await fetch(`${SUPABASE_BASE_URL}/home_tasks?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders }); } catch (e) {}
         }
 
         // --- Fuel Logic ---
         async function fetchFuelItems() {
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/fuel?select=*&order=date.desc,created_at.desc`, { headers: apiHeaders });
+                const res = await fetch(`${SUPABASE_BASE_URL}/home_fuel?select=*&order=date.desc,created_at.desc`, { headers: apiHeaders });
                 if (res.ok) fuelItems = await res.json();
             } catch (e) {}
             renderFuelUI();
@@ -789,7 +789,7 @@
             document.getElementById('fuel-mileage').value = '';
 
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/fuel`, {
+                const res = await fetch(`${SUPABASE_BASE_URL}/home_fuel`, {
                     method: 'POST',
                     headers: apiHeaders,
                     body: JSON.stringify({ date, liters, price, mileage })
@@ -805,14 +805,14 @@
             fuelItems = fuelItems.filter(item => item.id !== id);
             renderFuelUI();
             try {
-                await fetch(`${SUPABASE_BASE_URL}/fuel?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
+                await fetch(`${SUPABASE_BASE_URL}/home_fuel?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
             } catch (e) {}
         }
 
         // --- Budget Logic ---
         async function fetchBudgetItems() {
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/budget?select=*&order=year.desc,month.desc`, { headers: apiHeaders });
+                const res = await fetch(`${SUPABASE_BASE_URL}/home_budget?select=*&order=year.desc,month.desc`, { headers: apiHeaders });
                 if (res.ok) budgetItems = await res.json();
             } catch (e) {}
             renderBudgetUI();
@@ -926,7 +926,7 @@
             document.getElementById('budget-notes').value = '';
 
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/budget`, {
+                const res = await fetch(`${SUPABASE_BASE_URL}/home_budget`, {
                     method: 'POST',
                     headers: {
                         ...apiHeaders,
@@ -946,7 +946,7 @@
             budgetItems = budgetItems.filter(item => item.id !== id);
             renderBudgetUI();
             try {
-                await fetch(`${SUPABASE_BASE_URL}/budget?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
+                await fetch(`${SUPABASE_BASE_URL}/home_budget?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
             } catch (e) {}
         }
 
