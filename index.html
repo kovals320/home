@@ -14,12 +14,15 @@
     <meta name="apple-mobile-web-app-title" content="ניהול בית">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/619/619032.png">
 
+    <!-- Warm up connections early -->
+    <link rel="preconnect" href="https://pjujibzoscawmstarerz.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Google Fonts (Rubik) -->
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         body {
@@ -29,8 +32,19 @@
         }
         .glass-card {
             background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+        /* Blur is costly on phones; only the sticky header and bottom bar have content scrolling behind them */
+        header.glass-card, nav.glass-card {
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+        }
+        .icon {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
         .tab-btn.active {
             background-color: #2563eb;
@@ -46,13 +60,30 @@
     </style>
 </head>
 <body class="text-slate-800 pb-24 md:pb-10">
+    <!-- Icons (inline sprite, replaces the Lucide library) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+        <symbol id="i-check-circle-2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+        <symbol id="i-check-square" viewBox="0 0 24 24"><path d="M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5"/><path d="m9 11 3 3L22 4"/></symbol>
+        <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+        <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+        <symbol id="i-fuel" viewBox="0 0 24 24"><line x1="3" x2="15" y1="22" y2="22"/><line x1="4" x2="14" y1="9" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/></symbol>
+        <symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+        <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+        <symbol id="i-plus-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></symbol>
+        <symbol id="i-shopping-cart" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></symbol>
+        <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></symbol>
+        <symbol id="i-sprout" viewBox="0 0 24 24"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></symbol>
+        <symbol id="i-trash-2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></symbol>
+        <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+    </svg>
 
     <!-- Header -->
     <header class="sticky top-0 z-50 glass-card shadow-sm border-b border-slate-200/80">
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="bg-blue-600 text-white p-2.5 rounded-2xl shadow-md shadow-blue-500/20">
-                    <i data-lucide="home" class="w-6 h-6"></i>
+                    <svg class="icon w-6 h-6" aria-hidden="true"><use href="#i-home"/></svg>
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight text-slate-900">ניהול בית</h1>
@@ -70,23 +101,23 @@
         <!-- Desktop Navigation Tabs -->
         <div class="hidden md:flex max-w-5xl mx-auto px-4 mt-2 gap-2 pb-2 overflow-x-auto">
             <button onclick="switchTab('shopping')" id="tab-desktop-shopping" class="tab-btn active px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
-                <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                <svg class="icon w-4 h-4" aria-hidden="true"><use href="#i-shopping-cart"/></svg>
                 קניות
             </button>
             <button onclick="switchTab('tasks')" id="tab-desktop-tasks" class="tab-btn px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
-                <i data-lucide="check-square" class="w-4 h-4"></i>
+                <svg class="icon w-4 h-4" aria-hidden="true"><use href="#i-check-square"/></svg>
                 מטלות
             </button>
             <button onclick="switchTab('fuel')" id="tab-desktop-fuel" class="tab-btn px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
-                <i data-lucide="fuel" class="w-4 h-4"></i>
+                <svg class="icon w-4 h-4" aria-hidden="true"><use href="#i-fuel"/></svg>
                 דלק
             </button>
             <button onclick="switchTab('budget')" id="tab-desktop-budget" class="tab-btn px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
-                <i data-lucide="wallet" class="w-4 h-4"></i>
+                <svg class="icon w-4 h-4" aria-hidden="true"><use href="#i-wallet"/></svg>
                 תקציב
             </button>
             <button onclick="switchTab('garden')" id="tab-desktop-garden" class="tab-btn px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition-all duration-200 text-slate-600 hover:bg-slate-100">
-                <i data-lucide="sprout" class="w-4 h-4"></i>
+                <svg class="icon w-4 h-4" aria-hidden="true"><use href="#i-sprout"/></svg>
                 גינה
             </button>
         </div>
@@ -96,7 +127,7 @@
     <div id="pwa-install-banner" class="hidden max-w-3xl mx-auto px-4 mt-4">
         <div class="bg-blue-600 text-white p-4 rounded-2xl shadow-lg flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <i data-lucide="download" class="w-6 h-6"></i>
+                <svg class="icon w-6 h-6" aria-hidden="true"><use href="#i-download"/></svg>
                 <div>
                     <h4 class="font-bold text-sm">התקן את האפליקציה</h4>
                     <p class="text-xs text-blue-100">גישה מהירה ממסך הבית בנייד</p>
@@ -117,7 +148,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
                         <div class="p-2 bg-blue-100 text-blue-600 rounded-xl">
-                            <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                            <svg class="icon w-6 h-6" aria-hidden="true"><use href="#i-shopping-cart"/></svg>
                         </div>
                         <div>
                             <h2 class="text-lg font-bold text-slate-800">רשימת קניות</h2>
@@ -133,7 +164,7 @@
                     <input type="text" id="shopping-input" placeholder="מה צריך לקנות? (למשל: חלב, לחם, סוללות...)" 
                         class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm bg-white/80 transition-all">
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-5 py-3 rounded-2xl font-medium text-sm shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition-all shrink-0">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <svg class="icon w-4 h-4" aria-hidden="true"><use href="#i-plus"/></svg>
                         הוסף
                     </button>
                 </form>
@@ -150,7 +181,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
                         <div class="p-2 bg-indigo-100 text-indigo-600 rounded-xl">
-                            <i data-lucide="check-square" class="w-6 h-6"></i>
+                            <svg class="icon w-6 h-6" aria-hidden="true"><use href="#i-check-square"/></svg>
                         </div>
                         <div>
                             <h2 class="text-lg font-bold text-slate-800">רשימת מטלות</h2>
@@ -166,7 +197,7 @@
                     <input type="text" id="task-input" placeholder="איזו מטלה צריך לבצע? (למשל: לקבוע תור, לתקן מנעול...)" 
                         class="flex-1 px-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-white/80 transition-all">
                     <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-5 py-3 rounded-2xl font-medium text-sm shadow-md shadow-indigo-500/20 flex items-center gap-1.5 transition-all shrink-0">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <svg class="icon w-4 h-4" aria-hidden="true"><use href="#i-plus"/></svg>
                         הוסף
                     </button>
                 </form>
@@ -184,7 +215,7 @@
             <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="fuel" class="w-5 h-5 text-amber-500"></i>
+                        <svg class="icon w-5 h-5 text-amber-500" aria-hidden="true"><use href="#i-fuel"/></svg>
                         <h2 class="text-base font-bold text-slate-800">תדלוק אחרון</h2>
                         <span id="last-fuel-date" class="text-xs text-slate-500 font-normal">--</span>
                     </div>
@@ -224,7 +255,7 @@
             <!-- טופס דיווח תדלוק -->
             <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
                 <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i data-lucide="plus-circle" class="w-5 h-5 text-amber-500"></i>
+                    <svg class="icon w-5 h-5 text-amber-500" aria-hidden="true"><use href="#i-plus-circle"/></svg>
                     דיווח תדלוק חדש
                 </h3>
                 <form onsubmit="addFuelItem(event)" class="space-y-3">
@@ -251,7 +282,7 @@
                             class="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500">
                     </div>
                     <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white py-3 rounded-2xl font-medium text-sm shadow-md shadow-amber-500/20 flex items-center justify-center gap-2 transition-all mt-2">
-                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <svg class="icon w-4 h-4" aria-hidden="true"><use href="#i-check"/></svg>
                         דווח תדלוק
                     </button>
                 </form>
@@ -314,7 +345,7 @@
             <!-- טופס דיווח הוצאות חודשי -->
             <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
                 <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i data-lucide="plus-circle" class="w-5 h-5 text-emerald-600"></i>
+                    <svg class="icon w-5 h-5 text-emerald-600" aria-hidden="true"><use href="#i-plus-circle"/></svg>
                     דיווח / עדכון הוצאה חודשית
                 </h3>
                 <form onsubmit="addBudgetItem(event)" class="space-y-3">
@@ -365,7 +396,7 @@
                     </div>
 
                     <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white py-3 rounded-2xl font-medium text-sm shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all mt-2">
-                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <svg class="icon w-4 h-4" aria-hidden="true"><use href="#i-check"/></svg>
                         שמור הוצאה
                     </button>
                 </form>
@@ -392,7 +423,7 @@
             <!-- קווי השקיה - כרטיסי הגדרה -->
             <div class="glass-card rounded-3xl p-6 shadow-sm border border-slate-200/60">
                 <div class="flex items-center gap-2 mb-4">
-                    <i data-lucide="sprout" class="w-5 h-5 text-emerald-600"></i>
+                    <svg class="icon w-5 h-5 text-emerald-600" aria-hidden="true"><use href="#i-sprout"/></svg>
                     <h2 class="text-base font-bold text-slate-800">קווי השקיה</h2>
                 </div>
 
@@ -460,23 +491,23 @@
     <nav class="md:hidden fixed bottom-0 left-0 right-0 glass-card border-t border-slate-200/80 px-2 py-2 z-50">
         <div class="flex justify-around items-center max-w-md mx-auto">
             <button onclick="switchTab('shopping')" id="tab-mobile-shopping" class="mobile-tab-btn flex flex-col items-center gap-1 text-blue-600 font-medium">
-                <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                <svg class="icon w-5 h-5" aria-hidden="true"><use href="#i-shopping-cart"/></svg>
                 <span class="text-[10px]">קניות</span>
             </button>
             <button onclick="switchTab('tasks')" id="tab-mobile-tasks" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium">
-                <i data-lucide="check-square" class="w-5 h-5"></i>
+                <svg class="icon w-5 h-5" aria-hidden="true"><use href="#i-check-square"/></svg>
                 <span class="text-[10px]">מטלות</span>
             </button>
             <button onclick="switchTab('fuel')" id="tab-mobile-fuel" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium">
-                <i data-lucide="fuel" class="w-5 h-5"></i>
+                <svg class="icon w-5 h-5" aria-hidden="true"><use href="#i-fuel"/></svg>
                 <span class="text-[10px]">דלק</span>
             </button>
             <button onclick="switchTab('budget')" id="tab-mobile-budget" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium">
-                <i data-lucide="wallet" class="w-5 h-5"></i>
+                <svg class="icon w-5 h-5" aria-hidden="true"><use href="#i-wallet"/></svg>
                 <span class="text-[10px]">תקציב</span>
             </button>
             <button onclick="switchTab('garden')" id="tab-mobile-garden" class="mobile-tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium">
-                <i data-lucide="sprout" class="w-5 h-5"></i>
+                <svg class="icon w-5 h-5" aria-hidden="true"><use href="#i-sprout"/></svg>
                 <span class="text-[10px]">גינה</span>
             </button>
         </div>
@@ -536,13 +567,32 @@
         let fuelItems = [];
         let budgetItems = [];
 
+        // Last-known data is kept on the device so the app shows it instantly, then refreshes from Supabase
+        const CACHE_PREFIX = 'home_cache_';
+        function loadCache(name) {
+            try { const v = localStorage.getItem(CACHE_PREFIX + name); return v ? JSON.parse(v) : null; } catch (e) { return null; }
+        }
+        function saveCache(name, data) {
+            try { localStorage.setItem(CACHE_PREFIX + name, JSON.stringify(data)); } catch (e) {}
+        }
+
+        // Escape user text before inserting it into HTML
+        const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+        function esc(v) { return String(v ?? '').replace(/[&<>"']/g, c => ESC_MAP[c]); }
+
         // Init
         document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
             document.getElementById('fuel-date').valueAsDate = new Date();
             const now = new Date();
             document.getElementById('budget-month').value = now.getMonth() + 1;
             document.getElementById('budget-year').value = now.getFullYear();
+
+            // Instant render from the saved copy (if any)
+            const cached = { shopping: loadCache('shopping'), tasks: loadCache('tasks'), fuel: loadCache('fuel'), budget: loadCache('budget') };
+            if (cached.shopping) { shoppingItems = cached.shopping; renderShoppingList(); }
+            if (cached.tasks) { taskItems = cached.tasks; renderTasksList(); }
+            if (cached.fuel) { fuelItems = cached.fuel; renderFuelUI(); }
+            if (cached.budget) { budgetItems = cached.budget; renderBudgetUI(); }
 
             fetchShoppingItems();
             fetchTaskItems();
@@ -585,12 +635,12 @@
         }
 
         function renderShoppingList() {
+            saveCache('shopping', shoppingItems);
             const listEl = document.getElementById('shopping-list');
             document.getElementById('shopping-count').textContent = `${shoppingItems.length} מוצרים`;
 
             if (shoppingItems.length === 0) {
-                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><i data-lucide="check-circle-2" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i><p class="text-sm">אין מוצרים ברשימת הקניות!</p></div>`;
-                lucide.createIcons();
+                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><svg class="icon w-10 h-10 mx-auto mb-2 text-slate-300" aria-hidden="true"><use href="#i-check-circle-2"/></svg><p class="text-sm">אין מוצרים ברשימת הקניות!</p></div>`;
                 return;
             }
 
@@ -598,13 +648,12 @@
                 <div onclick="removeShoppingItem(${item.id})" class="item-card bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between cursor-pointer group">
                     <div class="flex items-center gap-3">
                         <div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-blue-600 group-hover:bg-blue-600 flex items-center justify-center text-white shrink-0">
-                            <i data-lucide="check" class="w-3 h-3 opacity-0 group-hover:opacity-100"></i>
+                            <svg class="icon w-3 h-3 opacity-0 group-hover:opacity-100" aria-hidden="true"><use href="#i-check"/></svg>
                         </div>
-                        <span class="text-sm font-medium text-slate-800 group-hover:text-slate-500 group-hover:line-through">${item.title}</span>
+                        <span class="text-sm font-medium text-slate-800 group-hover:text-slate-500 group-hover:line-through">${esc(item.title)}</span>
                     </div>
                 </div>
             `).join('');
-            lucide.createIcons();
         }
 
         async function addShoppingItem(e) {
@@ -643,12 +692,12 @@
         }
 
         function renderTasksList() {
+            saveCache('tasks', taskItems);
             const listEl = document.getElementById('tasks-list');
             document.getElementById('tasks-count').textContent = `${taskItems.length} מטלות`;
 
             if (taskItems.length === 0) {
-                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><i data-lucide="sparkles" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i><p class="text-sm">אין מטלות פתוחות. כל הכבוד!</p></div>`;
-                lucide.createIcons();
+                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><svg class="icon w-10 h-10 mx-auto mb-2 text-slate-300" aria-hidden="true"><use href="#i-sparkles"/></svg><p class="text-sm">אין מטלות פתוחות. כל הכבוד!</p></div>`;
                 return;
             }
 
@@ -656,13 +705,12 @@
                 <div onclick="removeTaskItem(${item.id})" class="item-card bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between cursor-pointer group">
                     <div class="flex items-center gap-3">
                         <div class="w-5 h-5 rounded-full border-2 border-slate-300 group-hover:border-indigo-600 group-hover:bg-indigo-600 flex items-center justify-center text-white shrink-0">
-                            <i data-lucide="check" class="w-3 h-3 opacity-0 group-hover:opacity-100"></i>
+                            <svg class="icon w-3 h-3 opacity-0 group-hover:opacity-100" aria-hidden="true"><use href="#i-check"/></svg>
                         </div>
-                        <span class="text-sm font-medium text-slate-800 group-hover:text-slate-500 group-hover:line-through">${item.title}</span>
+                        <span class="text-sm font-medium text-slate-800 group-hover:text-slate-500 group-hover:line-through">${esc(item.title)}</span>
                     </div>
                 </div>
             `).join('');
-            lucide.createIcons();
         }
 
         async function addTaskItem(e) {
@@ -707,6 +755,7 @@
         }
 
         function renderFuelUI() {
+            saveCache('fuel', fuelItems);
             const listEl = document.getElementById('fuel-list');
             document.getElementById('fuel-count').textContent = `${fuelItems.length} תדלוקים`;
 
@@ -719,8 +768,7 @@
                 document.getElementById('stat-avg-days').textContent = '--';
                 document.getElementById('stat-avg-distance').textContent = '--';
 
-                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><i data-lucide="fuel" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i><p class="text-sm">טרם הוגדרו דיווחי תדלוק</p></div>`;
-                lucide.createIcons();
+                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><svg class="icon w-10 h-10 mx-auto mb-2 text-slate-300" aria-hidden="true"><use href="#i-fuel"/></svg><p class="text-sm">טרם הוגדרו דיווחי תדלוק</p></div>`;
                 return;
             }
 
@@ -761,13 +809,12 @@
                     <div class="flex items-center gap-3">
                         <span class="text-sm font-bold text-slate-800">₪${Number(item.price).toFixed(2)}</span>
                         <button onclick="removeFuelItem(${item.id})" class="text-slate-300 hover:text-red-500 transition-colors p-1">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            <svg class="icon w-4 h-4" aria-hidden="true"><use href="#i-trash-2"/></svg>
                         </button>
                     </div>
                 </div>
             `).join('');
 
-            lucide.createIcons();
         }
 
         async function addFuelItem(e) {
@@ -819,6 +866,7 @@
         }
 
         function renderBudgetUI() {
+            saveCache('budget', budgetItems);
             const listEl = document.getElementById('budget-list');
 
             const categories = ["אשראי חודשי", "אשראי תשלומים", "קיבוץ", "משכנתא", "דלק"];
@@ -865,8 +913,7 @@
             document.getElementById('budget-count').textContent = `${monthKeys.length} חודשים`;
 
             if (monthKeys.length === 0) {
-                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><i data-lucide="wallet" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i><p class="text-sm">אין דיווחי תקציב עדיין</p></div>`;
-                lucide.createIcons();
+                listEl.innerHTML = `<div class="text-center py-8 text-slate-400"><svg class="icon w-10 h-10 mx-auto mb-2 text-slate-300" aria-hidden="true"><use href="#i-wallet"/></svg><p class="text-sm">אין דיווחי תקציב עדיין</p></div>`;
                 return;
             }
 
@@ -888,12 +935,12 @@
                             ${monthData.items.map(item => `
                                 <div class="flex items-center justify-between text-xs py-1">
                                     <div class="flex flex-col">
-                                        <span class="font-medium text-slate-700">${item.category}</span>${item.notes ? `<span class="text-[10px] text-slate-400 font-normal">${item.notes}</span>` : ''}
+                                        <span class="font-medium text-slate-700">${esc(item.category)}</span>${item.notes ? `<span class="text-[10px] text-slate-400 font-normal">${esc(item.notes)}</span>` : ''}
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span class="font-bold text-slate-800">₪${Number(item.amount).toLocaleString('he-IL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</span>
                                         <button onclick="removeBudgetItem(${item.id})" class="text-slate-300 hover:text-red-500 transition-colors p-0.5">
-                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                            <svg class="icon w-3.5 h-3.5" aria-hidden="true"><use href="#i-trash-2"/></svg>
                                         </button>
                                     </div>
                                 </div>
@@ -903,7 +950,6 @@
                 `;
             }).join('');
 
-            lucide.createIcons();
         }
 
         async function addBudgetItem(e) {
@@ -1024,7 +1070,7 @@
                                 ${activeLines.map(line => `
                                     <div class="bg-white border border-slate-200/80 rounded-2xl p-4 flex items-center justify-between">
                                         <div class="flex items-center gap-2">
-                                            <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
+                                            <svg class="icon w-4 h-4 text-slate-400" aria-hidden="true"><use href="#i-clock"/></svg>
                                             <span class="text-sm font-bold text-slate-800">${line.time}</span>
                                             <span class="text-xs text-slate-400 font-normal mr-1">${line.duration}</span>
                                         </div>
@@ -1041,7 +1087,6 @@
             }
 
             container.innerHTML = scheduleHtml || `<div class="text-center py-8 text-slate-400">אין השקיות מתוכננות לימים הקרובים</div>`;
-            lucide.createIcons();
         }
     </script>
 </body>
