@@ -920,17 +920,33 @@
             listEl.innerHTML = monthKeys.map(key => {
                 const monthData = monthsMap[key];
                 const monthTotal = monthData.items.reduce((acc, curr) => acc + Number(curr.amount), 0);
-                
+                const reported = new Set(monthData.items.map(i => i.category));
+                const missing = categories.filter(c => !reported.has(c));
+                const doneCount = categories.length - missing.length;
+                const statusBadge = missing.length === 0
+                    ? `<span class="text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">✓ הושלם</span>`
+                    : `<span class="text-[10px] font-semibold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">${doneCount}/${categories.length}</span>`;
+                const missingRow = missing.length === 0 ? '' : `
+                        <div class="flex flex-wrap items-center gap-1.5 bg-amber-50/60 border border-amber-200/70 rounded-xl px-2.5 py-2">
+                            <span class="text-[11px] font-semibold text-amber-800">חסר:</span>
+                            ${missing.map(cat => `
+                                <button onclick="fillBudgetForm(${Number(monthData.year)}, ${Number(monthData.month)}, '${esc(cat)}')" class="text-[11px] font-medium bg-white text-amber-800 border border-amber-300 hover:bg-amber-100 px-2 py-0.5 rounded-full transition-colors">
+                                    + ${esc(cat)}
+                                </button>
+                            `).join('')}
+                        </div>`;
+
                 return `
                     <div class="bg-white border border-slate-200/80 rounded-2xl p-4 space-y-3">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                            <div class="font-bold text-slate-800 text-sm">
-                                ${monthNames[monthData.month]} ${monthData.year}
+                            <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
+                                <span>${monthNames[monthData.month]} ${monthData.year}</span>
+                                ${statusBadge}
                             </div>
                             <div class="font-bold text-slate-900 text-sm">
                                 ₪${monthTotal.toLocaleString('he-IL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}
                             </div>
-                        </div>
+                        </div>${missingRow}
                         <div class="space-y-2">
                             ${monthData.items.map(item => `
                                 <div class="flex items-center justify-between text-xs py-1">
@@ -950,6 +966,16 @@
                 `;
             }).join('');
 
+        }
+
+        // Clicking a missing category pre-fills the report form for that month
+        function fillBudgetForm(year, month, category) {
+            document.getElementById('budget-year').value = year;
+            document.getElementById('budget-month').value = month;
+            document.getElementById('budget-category').value = category;
+            const amountEl = document.getElementById('budget-amount');
+            amountEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            amountEl.focus({ preventScroll: true });
         }
 
         async function addBudgetItem(e) {
