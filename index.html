@@ -437,7 +437,7 @@
                             </span>
                             <span class="text-[10px] font-semibold text-emerald-600/80 bg-emerald-100/80 px-2 py-0.5 rounded-md">קו 1</span>
                         </div>
-                        <div class="text-xs text-emerald-700 font-medium">כל שבת · 05:30 · 90 דק'</div>
+                        <div class="text-xs text-emerald-700 font-medium">כל ראשון · 06:00 · 60 דק'</div>
                     </div>
 
                     <!-- קו 2 -->
@@ -449,7 +449,7 @@
                             </span>
                             <span class="text-[10px] font-semibold text-teal-600/80 bg-teal-100/80 px-2 py-0.5 rounded-md">קו 2</span>
                         </div>
-                        <div class="text-xs text-teal-700 font-medium">כל חמישי · 06:30 · 30 דק'</div>
+                        <div class="text-xs text-teal-700 font-medium">כל ראשון · 07:00 · 30 דק'</div>
                     </div>
 
                     <!-- קו 3 -->
@@ -461,7 +461,7 @@
                             </span>
                             <span class="text-[10px] font-semibold text-amber-600/80 bg-amber-100/80 px-2 py-0.5 rounded-md">קו 3</span>
                         </div>
-                        <div class="text-xs text-amber-700 font-medium">כל 3 ימים · 07:30 · 20 דק'</div>
+                        <div class="text-xs text-amber-700 font-medium">כל ראשון · 07:30 · 30 דק'</div>
                     </div>
 
                     <!-- קו 4 -->
@@ -473,7 +473,7 @@
                             </span>
                             <span class="text-[10px] font-semibold text-rose-600/80 bg-rose-100/80 px-2 py-0.5 rounded-md">קו 4</span>
                         </div>
-                        <div class="text-xs text-rose-700 font-medium">כל חמישי · 08:00 · 10 דק'</div>
+                        <div class="text-xs text-rose-700 font-medium">כל ראשון · 08:00 · 30 דק'</div>
                     </div>
                 </div>
             </div>
@@ -1087,42 +1087,38 @@
                 {
                     name: 'דשא',
                     lineNum: 1,
-                    time: '05:30',
-                    duration: '90 דק\'',
+                    time: '06:00',
+                    duration: '60 דק\'',
                     color: 'emerald',
                     dotBg: 'bg-emerald-500',
-                    isDue: (date) => date.getDay() === 6
+                    isDue: (date) => date.getDay() === 0
                 },
                 {
                     name: 'שיחים',
                     lineNum: 2,
-                    time: '06:30',
+                    time: '07:00',
                     duration: '30 דק\'',
                     color: 'teal',
                     dotBg: 'bg-teal-500',
-                    isDue: (date) => date.getDay() === 4
+                    isDue: (date) => date.getDay() === 0
                 },
                 {
                     name: 'עצים',
                     lineNum: 3,
                     time: '07:30',
-                    duration: '20 דק\'',
+                    duration: '30 דק\'',
                     color: 'amber',
                     dotBg: 'bg-amber-500',
-                    isDue: (date) => {
-                        const refDate = new Date(2026, 9, 11);
-                        const diffTime = Math.floor((date.setHours(0,0,0,0) - refDate.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
-                        return diffTime % 3 === 0;
-                    }
+                    isDue: (date) => date.getDay() === 0
                 },
                 {
                     name: 'פרחים',
                     lineNum: 4,
                     time: '08:00',
-                    duration: '10 דק\'',
+                    duration: '30 דק\'',
                     color: 'rose',
                     dotBg: 'bg-rose-500',
-                    isDue: (date) => date.getDay() === 4
+                    isDue: (date) => date.getDay() === 0
                 }
             ];
 
