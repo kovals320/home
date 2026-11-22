@@ -66,6 +66,35 @@
     </style>
 </head>
 <body class="text-slate-800 pb-24 md:pb-10">
+    <!-- Login screen (only you can sign in) -->
+    <div id="login-screen" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-4" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);">
+        <div class="glass-card w-full max-w-sm rounded-3xl p-6 shadow-lg border border-slate-200/60">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="bg-blue-600 text-white p-2.5 rounded-2xl shadow-md shadow-blue-500/20">
+                    <svg class="icon w-6 h-6" aria-hidden="true"><use href="#i-home"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900">ניהול בית</h1>
+                    <p class="text-xs text-slate-500">כניסה עם קוד שנשלח למייל</p>
+                </div>
+            </div>
+            <form id="login-email-form" onsubmit="sendLoginCode(event)" class="space-y-3">
+                <label class="block text-xs font-medium text-slate-500">כתובת מייל</label>
+                <input type="email" id="login-email" required autocomplete="email" dir="ltr"
+                    class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white py-3 rounded-2xl font-medium text-sm shadow-md shadow-blue-500/20 transition-all">שלח לי קוד</button>
+            </form>
+            <form id="login-code-form" onsubmit="verifyLoginCode(event)" class="hidden space-y-3">
+                <label class="block text-xs font-medium text-slate-500">הקוד שקיבלת במייל</label>
+                <input type="text" id="login-code" required inputmode="numeric" autocomplete="one-time-code" dir="ltr" maxlength="10"
+                    class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-lg tracking-widest text-center bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white py-3 rounded-2xl font-medium text-sm shadow-md shadow-blue-500/20 transition-all">כניסה</button>
+                <button type="button" onclick="resetLogin()" class="w-full text-xs text-slate-500 hover:text-slate-700 py-1">שליחה לכתובת אחרת</button>
+            </form>
+            <p id="login-message" class="text-xs text-center mt-3 min-h-[1rem] text-slate-500"></p>
+        </div>
+    </div>
+
     <!-- Icons (inline sprite, replaces the Lucide library) -->
     <svg width="0" height="0" style="position:absolute" aria-hidden="true">
         <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
@@ -101,6 +130,7 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5 animate-pulse"></span>
                     מחובר לענן
                 </span>
+                <button onclick="logout()" class="text-xs font-medium text-slate-500 hover:text-red-600 px-2.5 py-1 rounded-full border border-slate-200 bg-white/70 transition-colors">יציאה</button>
             </div>
         </div>
 
@@ -572,6 +602,123 @@
             'Prefer': 'return=representation'
         };
 
+        // --- Sign-in (email code) ---
+        const SUPABASE_AUTH_URL = 'https://pjujibzoscawmstarerz.supabase.co/auth/v1';
+        const SESSION_KEY = 'home_session';
+        const authHeaders = { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' };
+        let session = null;
+        try { session = JSON.parse(localStorage.getItem(SESSION_KEY)); } catch (e) {}
+
+        function storeSession(s) {
+            session = s;
+            try { s ? localStorage.setItem(SESSION_KEY, JSON.stringify(s)) : localStorage.removeItem(SESSION_KEY); } catch (e) {}
+        }
+        function toSession(d) {
+            return {
+                access_token: d.access_token,
+                refresh_token: d.refresh_token,
+                expires_at: d.expires_at || Math.floor(Date.now() / 1000) + (d.expires_in || 3600)
+            };
+        }
+
+        // Returns a valid access token, refreshing it when it is about to expire (one refresh at a time)
+        let refreshing = null;
+        async function getAccessToken() {
+            if (!session) return null;
+            if (session.expires_at - 60 > Date.now() / 1000) return session.access_token;
+            if (!refreshing) {
+                refreshing = (async () => {
+                    try {
+                        const r = await fetch(`${SUPABASE_AUTH_URL}/token?grant_type=refresh_token`, {
+                            method: 'POST', headers: authHeaders, body: JSON.stringify({ refresh_token: session.refresh_token })
+                        });
+                        if (r.ok) storeSession(toSession(await r.json()));
+                        else if (r.status >= 400 && r.status < 500) storeSession(null);
+                    } catch (e) { /* offline: keep the session and try again later */ }
+                })();
+            }
+            const p = refreshing;
+            await p;
+            if (refreshing === p) refreshing = null;
+            return session ? session.access_token : null;
+        }
+
+        // All data requests go through here, signed with the user's token
+        async function authFetch(url, opts = {}) {
+            const token = await getAccessToken();
+            if (!token) { showLogin(); throw new Error('not signed in'); }
+            const res = await fetch(url, { ...opts, headers: { ...(opts.headers || apiHeaders), 'Authorization': `Bearer ${token}` } });
+            if (res.status === 401) { storeSession(null); showLogin(); }
+            return res;
+        }
+
+        function setLoginMessage(text, isError) {
+            const el = document.getElementById('login-message');
+            el.textContent = text || '';
+            el.className = `text-xs text-center mt-3 min-h-[1rem] ${isError ? 'text-red-600' : 'text-slate-500'}`;
+        }
+        function showLogin() {
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+        function resetLogin() {
+            document.getElementById('login-code-form').classList.add('hidden');
+            document.getElementById('login-email-form').classList.remove('hidden');
+            setLoginMessage('');
+        }
+
+        async function sendLoginCode(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            if (!email) return;
+            setLoginMessage('שולח...');
+            try {
+                const r = await fetch(`${SUPABASE_AUTH_URL}/otp`, {
+                    method: 'POST', headers: authHeaders, body: JSON.stringify({ email, create_user: false })
+                });
+                if (r.ok) {
+                    document.getElementById('login-email-form').classList.add('hidden');
+                    document.getElementById('login-code-form').classList.remove('hidden');
+                    document.getElementById('login-code').focus();
+                    setLoginMessage('שלחנו קוד למייל. הוא בתוקף לזמן קצר.');
+                } else if (r.status === 429) {
+                    setLoginMessage('נשלחו יותר מדי קודים. נסה שוב בעוד כמה דקות.', true);
+                } else {
+                    setLoginMessage('לא ניתן לשלוח קוד לכתובת הזו.', true);
+                }
+            } catch (err) {
+                setLoginMessage('אין חיבור לאינטרנט.', true);
+            }
+        }
+
+        async function verifyLoginCode(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const token = document.getElementById('login-code').value.replace(/\s/g, '');
+            if (!token) return;
+            setLoginMessage('בודק...');
+            try {
+                const r = await fetch(`${SUPABASE_AUTH_URL}/verify`, {
+                    method: 'POST', headers: authHeaders, body: JSON.stringify({ type: 'email', email, token })
+                });
+                if (!r.ok) { setLoginMessage('הקוד שגוי או שפג תוקפו.', true); return; }
+                storeSession(toSession(await r.json()));
+                document.getElementById('login-code').value = '';
+                resetLogin();
+                document.getElementById('login-screen').classList.add('hidden');
+                loadAllData();
+            } catch (err) {
+                setLoginMessage('אין חיבור לאינטרנט.', true);
+            }
+        }
+
+        async function logout() {
+            const token = session && session.access_token;
+            storeSession(null);
+            ['shopping', 'tasks', 'fuel', 'budget'].forEach(k => { try { localStorage.removeItem('home_cache_' + k); } catch (e) {} });
+            if (token) fetch(`${SUPABASE_AUTH_URL}/logout`, { method: 'POST', headers: { ...authHeaders, 'Authorization': `Bearer ${token}` } }).catch(() => {});
+            location.reload();
+        }
+
         const monthNames = ["", "ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
         const dayNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
 
@@ -608,12 +755,16 @@
             if (cached.fuel) { fuelItems = cached.fuel; renderFuelUI(); }
             if (cached.budget) { budgetItems = cached.budget; renderBudgetUI(); }
 
+            renderGardenSchedule();
+            if (session) loadAllData(); else showLogin();
+        });
+
+        function loadAllData() {
             fetchShoppingItems();
             fetchTaskItems();
             fetchFuelItems();
             fetchBudgetItems();
-            renderGardenSchedule();
-        });
+        }
 
         // Tab Switch
         function switchTab(tabName) {
@@ -668,12 +819,12 @@
             const cutoff = new Date(Date.now() - DELETE_GRACE_MS).toISOString();
             try {
                 const filter = encodeURIComponent(`(deleted_at.is.null,deleted_at.gt.${cutoff})`);
-                const res = await fetch(`${SUPABASE_BASE_URL}/${cfg.table}?select=*&or=${filter}&order=created_at.desc`, { headers: apiHeaders });
+                const res = await authFetch(`${SUPABASE_BASE_URL}/${cfg.table}?select=*&or=${filter}&order=created_at.desc`, { headers: apiHeaders });
                 if (res.ok) cfg.set(await res.json());
             } catch (e) {}
             renderList(kind);
             // Permanently remove rows whose 24h grace period has passed
-            fetch(`${SUPABASE_BASE_URL}/${cfg.table}?deleted_at=lt.${encodeURIComponent(cutoff)}`, { method: 'DELETE', headers: apiHeaders }).catch(() => {});
+            authFetch(`${SUPABASE_BASE_URL}/${cfg.table}?deleted_at=lt.${encodeURIComponent(cutoff)}`, { method: 'DELETE', headers: apiHeaders }).catch(() => {});
         }
 
         function renderList(kind) {
@@ -738,7 +889,7 @@
             // Keep the pending save so a quick delete/undo waits for the real id
             pendingSaves.set(tempItem, (async () => {
                 try {
-                    const res = await fetch(`${SUPABASE_BASE_URL}/${cfg.table}`, { method: 'POST', headers: apiHeaders, body: JSON.stringify({ title: value }) });
+                    const res = await authFetch(`${SUPABASE_BASE_URL}/${cfg.table}`, { method: 'POST', headers: apiHeaders, body: JSON.stringify({ title: value }) });
                     if (res.ok) {
                         const data = await res.json();
                         if (data && data[0]) { tempItem.id = data[0].id; delete tempItem.tempId; renderList(kind); }
@@ -761,7 +912,7 @@
             renderList(kind);
             if (pendingSaves.has(item)) await pendingSaves.get(item);
             try {
-                await fetch(`${SUPABASE_BASE_URL}/${cfg.table}?id=eq.${item.id}`, {
+                await authFetch(`${SUPABASE_BASE_URL}/${cfg.table}?id=eq.${item.id}`, {
                     method: 'PATCH', headers: apiHeaders, body: JSON.stringify({ deleted_at: value })
                 });
             } catch (e) {}
@@ -804,7 +955,7 @@
         // --- Fuel Logic ---
         async function fetchFuelItems() {
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/home_fuel?select=*&order=date.desc,created_at.desc`, { headers: apiHeaders });
+                const res = await authFetch(`${SUPABASE_BASE_URL}/home_fuel?select=*&order=date.desc,created_at.desc`, { headers: apiHeaders });
                 if (res.ok) fuelItems = await res.json();
             } catch (e) {}
             renderFuelUI();
@@ -898,7 +1049,7 @@
             document.getElementById('fuel-mileage').value = '';
 
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/home_fuel`, {
+                const res = await authFetch(`${SUPABASE_BASE_URL}/home_fuel`, {
                     method: 'POST',
                     headers: apiHeaders,
                     body: JSON.stringify({ date, liters, price, mileage })
@@ -914,14 +1065,14 @@
             fuelItems = fuelItems.filter(item => item.id !== id);
             renderFuelUI();
             try {
-                await fetch(`${SUPABASE_BASE_URL}/home_fuel?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
+                await authFetch(`${SUPABASE_BASE_URL}/home_fuel?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
             } catch (e) {}
         }
 
         // --- Budget Logic ---
         async function fetchBudgetItems() {
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/home_budget?select=*&order=year.desc,month.desc`, { headers: apiHeaders });
+                const res = await authFetch(`${SUPABASE_BASE_URL}/home_budget?select=*&order=year.desc,month.desc`, { headers: apiHeaders });
                 if (res.ok) budgetItems = await res.json();
             } catch (e) {}
             renderBudgetUI();
@@ -1060,7 +1211,7 @@
             document.getElementById('budget-notes').value = '';
 
             try {
-                const res = await fetch(`${SUPABASE_BASE_URL}/home_budget`, {
+                const res = await authFetch(`${SUPABASE_BASE_URL}/home_budget`, {
                     method: 'POST',
                     headers: {
                         ...apiHeaders,
@@ -1080,7 +1231,7 @@
             budgetItems = budgetItems.filter(item => item.id !== id);
             renderBudgetUI();
             try {
-                await fetch(`${SUPABASE_BASE_URL}/home_budget?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
+                await authFetch(`${SUPABASE_BASE_URL}/home_budget?id=eq.${id}`, { method: 'DELETE', headers: apiHeaders });
             } catch (e) {}
         }
 
