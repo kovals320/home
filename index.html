@@ -75,21 +75,21 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold text-slate-900">ניהול בית</h1>
-                    <p class="text-xs text-slate-500">כניסה עם קוד שנשלח למייל</p>
+                    <p class="text-xs text-slate-500">כניסה לחשבון שלך</p>
                 </div>
             </div>
-            <form id="login-email-form" onsubmit="sendLoginCode(event)" class="space-y-3">
-                <label class="block text-xs font-medium text-slate-500">כתובת מייל</label>
-                <input type="email" id="login-email" required autocomplete="email" dir="ltr"
-                    class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white py-3 rounded-2xl font-medium text-sm shadow-md shadow-blue-500/20 transition-all">שלח לי קוד</button>
-            </form>
-            <form id="login-code-form" onsubmit="verifyLoginCode(event)" class="hidden space-y-3">
-                <label class="block text-xs font-medium text-slate-500">הקוד שקיבלת במייל</label>
-                <input type="text" id="login-code" required inputmode="numeric" autocomplete="one-time-code" dir="ltr" maxlength="10"
-                    class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-lg tracking-widest text-center bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+            <form id="login-form" onsubmit="signIn(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">מייל</label>
+                    <input type="email" id="login-email" required autocomplete="username" dir="ltr"
+                        class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 mb-1">סיסמה</label>
+                    <input type="password" id="login-password" required autocomplete="current-password" dir="ltr"
+                        class="w-full px-4 py-3 rounded-2xl border border-slate-200 text-sm bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                </div>
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white py-3 rounded-2xl font-medium text-sm shadow-md shadow-blue-500/20 transition-all">כניסה</button>
-                <button type="button" onclick="resetLogin()" class="w-full text-xs text-slate-500 hover:text-slate-700 py-1">שליחה לכתובת אחרת</button>
             </form>
             <p id="login-message" class="text-xs text-center mt-3 min-h-[1rem] text-slate-500"></p>
         </div>
@@ -660,50 +660,21 @@
         function showLogin() {
             document.getElementById('login-screen').classList.remove('hidden');
         }
-        function resetLogin() {
-            document.getElementById('login-code-form').classList.add('hidden');
-            document.getElementById('login-email-form').classList.remove('hidden');
-            setLoginMessage('');
-        }
-
-        async function sendLoginCode(e) {
+        async function signIn(e) {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim();
-            if (!email) return;
-            setLoginMessage('שולח...');
+            const passEl = document.getElementById('login-password');
+            if (!email || !passEl.value) return;
+            setLoginMessage('מתחבר...');
             try {
-                const r = await fetch(`${SUPABASE_AUTH_URL}/otp`, {
-                    method: 'POST', headers: authHeaders, body: JSON.stringify({ email, create_user: false })
+                const r = await fetch(`${SUPABASE_AUTH_URL}/token?grant_type=password`, {
+                    method: 'POST', headers: authHeaders, body: JSON.stringify({ email, password: passEl.value })
                 });
-                if (r.ok) {
-                    document.getElementById('login-email-form').classList.add('hidden');
-                    document.getElementById('login-code-form').classList.remove('hidden');
-                    document.getElementById('login-code').focus();
-                    setLoginMessage('שלחנו קוד למייל. הוא בתוקף לזמן קצר.');
-                } else if (r.status === 429) {
-                    setLoginMessage('נשלחו יותר מדי קודים. נסה שוב בעוד כמה דקות.', true);
-                } else {
-                    setLoginMessage('לא ניתן לשלוח קוד לכתובת הזו.', true);
-                }
-            } catch (err) {
-                setLoginMessage('אין חיבור לאינטרנט.', true);
-            }
-        }
-
-        async function verifyLoginCode(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value.trim();
-            const token = document.getElementById('login-code').value.replace(/\s/g, '');
-            if (!token) return;
-            setLoginMessage('בודק...');
-            try {
-                const r = await fetch(`${SUPABASE_AUTH_URL}/verify`, {
-                    method: 'POST', headers: authHeaders, body: JSON.stringify({ type: 'email', email, token })
-                });
-                if (!r.ok) { setLoginMessage('הקוד שגוי או שפג תוקפו.', true); return; }
+                if (r.status === 429) { setLoginMessage('יותר מדי ניסיונות. נסה שוב בעוד כמה דקות.', true); return; }
+                if (!r.ok) { setLoginMessage('מייל או סיסמה שגויים.', true); return; }
                 storeSession(toSession(await r.json()));
-                document.getElementById('login-code').value = '';
-                resetLogin();
+                passEl.value = '';
+                setLoginMessage('');
                 document.getElementById('login-screen').classList.add('hidden');
                 loadAllData();
             } catch (err) {
